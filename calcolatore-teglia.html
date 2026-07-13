@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="./manifest.json">
+<title>Calcolatore Pizza in Teglia</title>
+<style>
+  :root {
+    --marrone:  #3E2723;
+    --marrone-l:#EFEBE9;
+    --giallo:   #FFF9C4;
+    --verde:    #E8F5E9;
+    --output:   #E3F2FD;
+    --crv:      #F3E5F5;
+    --radius:   8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, sans-serif;
+    background: #f5f5f5;
+    padding: 16px;
+    color: #222;
+  }
+  h1 {
+    background: var(--marrone);
+    color: #fff;
+    text-align: center;
+    padding: 14px;
+    border-radius: var(--radius);
+    font-size: 1.1rem;
+    margin-bottom: 16px;
+  }
+  .card {
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.1);
+  }
+  .card h2 {
+    font-size: .8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    background: var(--marrone-l);
+    color: var(--marrone);
+    padding: 6px 10px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+  }
+  .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid #eee;
+    gap: 8px;
+  }
+  .row:last-child { border-bottom: none; }
+  label { font-size: .9rem; flex: 1; }
+  input[type=number] {
+    width: 90px;
+    padding: 6px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: .95rem;
+    text-align: right;
+    background: var(--giallo);
+  }
+  input[type=text] {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: .95rem;
+    background: #fff;
+  }
+  input[type=number]:focus {
+    outline: 2px solid var(--marrone);
+    border-color: var(--marrone);
+  }
+  input[type=text]:focus {
+    outline: 2px solid var(--marrone);
+    border-color: var(--marrone);
+  }
+  .out-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 10px;
+    border-radius: 4px;
+    background: var(--output);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .out-row span:last-child { font-size: 1.05rem; color: var(--marrone); }
+  .crv-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 8px;
+    background: var(--crv);
+    border-radius: 4px;
+    margin-bottom: 4px;
+    font-size: .88rem;
+  }
+  .crv-row b { color: var(--marrone); }
+  .fix-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    font-size: .88rem;
+    border-bottom: 1px solid #eee;
+  }
+  .fix-row:last-child { border-bottom: none; }
+  .fix-val { background: var(--verde); padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+  .formula-box {
+    background: #f5f5f5;
+    border-radius: 4px;
+    padding: 10px;
+    font-size: .82rem;
+    color: #555;
+    line-height: 1.7;
+    margin-top: 8px;
+  }
+  .formula-box b { color: var(--marrone); }
+  .note {
+    font-size: .82rem;
+    color: #555;
+    background: #f5f5f5;
+    padding: 8px 10px;
+    border-radius: 4px;
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+  #avviso {
+    padding: 10px 14px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: .9rem;
+  }
+  .ok   { background: #C8E6C9; color: #1B5E20; }
+  .warn { background: #FFE0B2; color: #E65100; }
+  .actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-bottom: 14px;
+  }
+  .btn {
+    border: 0;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-weight: 700;
+    cursor: pointer;
+    background: var(--marrone);
+    color: #fff;
+  }
+  .print-sheet {
+    display: none;
+    background: #fff;
+    color: #000;
+    padding: 10px 0;
+  }
+  .print-sheet h2 {
+    font-size: 1rem;
+    margin-bottom: 8px;
+  }
+  .print-line {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    border-bottom: 1px solid #ddd;
+    gap: 8px;
+  }
+  .print-note {
+    margin-top: 12px;
+    border-top: 1px solid #ddd;
+    padding-top: 8px;
+  }
+  @media print {
+    body {
+      background: #fff;
+      padding: 0;
+      color: #000;
+      font-size: 12pt;
+    }
+    h1, .card, .actions { display: none !important; }
+    .print-sheet { display: block !important; }
+    @page { margin: 12mm; }
+  }
+  @media (max-width: 480px) {
+    input[type=number] { width: 80px; }
+  }
+</style>
+</head>
+<body>
+
+<h1>🍕 Calcolatore Pizza in Teglia 72% — precottura rossa</h1>
+
+<!-- INPUT -->
+<div class="card">
+  <h2>1) Input</h2>
+  <div class="row">
+    <label>Numero teglie</label>
+    <input type="number" id="n_teglie" value="5" min="1" step="1">
+  </div>
+  <div class="row">
+    <label>Peso impasto per teglia (g)</label>
+    <input type="number" id="w_teglia" value="715" min="300" step="5">
+  </div>
+  <div class="row">
+    <label>Ore maturazione in frigo a 4 °C</label>
+    <input type="number" id="ore" value="48" min="1" step="1">
+  </div>
+  <div class="row">
+    <label>Margine extra (%)</label>
+    <input type="number" id="margine" value="0" min="0" max="20" step="1">
+  </div>
+</div>
+
+<!-- FORMULA LIEVITO -->
+<div class="card">
+  <h2>2) Formula lievito</h2>
+  <div class="crv-row"><span>Lievito riferimento</span><b id="ref_gy">3.5 g/kg</b></div>
+  <div class="crv-row"><span>Ore riferimento</span><b>48 h</b></div>
+  <div class="crv-row"><span>Esponente</span><b>1.1</b></div>
+  <div class="crv-row"><span>Lievito calcolato (g/kg)</span><b id="liev_gkg">—</b></div>
+  <div class="formula-box">
+    <b>lievito (g/kg) = ref_g_kg × (ore_rif / ore_desiderate) ^ esponente</b><br>
+    Con esponente = 1.00 → proporzione inversa semplice.<br>
+    Con esponente = 1.1 → correzione nonlineare (meno lievito per tempi lunghi).
+  </div>
+</div>
+
+<!-- PARAMETRI FISSI -->
+<div class="card">
+  <h2>3) Parametri fissi</h2>
+  <div class="fix-row"><span>Idratazione</span><span class="fix-val">72%</span></div>
+  <div class="fix-row"><span>Sale</span><span class="fix-val">25 g/kg farina (2.5%)</span></div>
+  <div class="fix-row"><span>Olio EVO</span><span class="fix-val">30 g/kg farina (3%)</span></div>
+  <div class="fix-row"><span>Autolisi acqua</span><span class="fix-val">90% dell'acqua totale</span></div>
+  <div class="fix-row"><span>Durata autolisi</span><span class="fix-val">45 min</span></div>
+  <div class="fix-row"><span>Metodo</span><span class="fix-val">Precottura base rossa + rigenerazione</span></div>
+</div>
+
+<!-- RICETTA TOTALE -->
+<div class="card">
+  <h2>4) Ricetta totale</h2>
+  <div class="out-row"><span>Impasto target (g)</span><span id="target">—</span></div>
+  <div class="out-row"><span>Impasto con margine (g)</span><span id="target_m">—</span></div>
+  <div class="out-row"><span>Farina totale (g)</span><span id="farina">—</span></div>
+  <div class="out-row"><span>Acqua totale (g)</span><span id="acqua">—</span></div>
+  <div class="out-row"><span>Sale totale (g)</span><span id="sale">—</span></div>
+  <div class="out-row"><span>Olio EVO totale (g)</span><span id="olio">—</span></div>
+  <div class="out-row"><span>Lievito fresco totale (g)</span><span id="lievito">—</span></div>
+</div>
+
+<!-- AUTOLISI -->
+<div class="card">
+  <h2>5) Autolisi</h2>
+  <div class="out-row"><span>Acqua in autolisi (g)</span><span id="auto_in">—</span></div>
+  <div class="out-row"><span>Acqua finale (g)</span><span id="auto_fin">—</span></div>
+  <div class="fix-row"><span>Durata</span><span class="fix-val">45 min</span></div>
+  <p class="note">Ordine aggiunta: lievito nell'acqua finale → ad incordatura avvenuta aggiungere sale, poi olio a filo.</p>
+</div>
+
+<!-- PER SINGOLA TEGLIA -->
+<div class="card">
+  <h2>6) Per singola teglia</h2>
+  <div class="out-row"><span>Farina (g)</span><span id="t_farina">—</span></div>
+  <div class="out-row"><span>Acqua (g)</span><span id="t_acqua">—</span></div>
+  <div class="out-row"><span>Sale (g)</span><span id="t_sale">—</span></div>
+  <div class="out-row"><span>Olio EVO (g)</span><span id="t_olio">—</span></div>
+  <div class="out-row"><span>Lievito fresco (g)</span><span id="t_lievito">—</span></div>
+  <div class="out-row"><span>Peso impasto (g)</span><span id="t_impasto">—</span></div>
+</div>
+
+<!-- AVVISO -->
+<div class="card">
+  <h2>7) Avviso maturazione</h2>
+  <div id="avviso" class="ok">✅ OK: dentro zona di maturazione consigliata (24–72 h)</div>
+</div>
+
+<div class="card">
+  <h2>8) Stampa</h2>
+  <div class="row">
+    <label>Note stampa</label>
+    <input type="text" id="print_note" placeholder="Scrivi una nota breve (opzionale)">
+  </div>
+</div>
+
+<div class="actions">
+  <button type="button" class="btn" id="btn_print">Stampa ricetta</button>
+</div>
+
+<div class="print-sheet" id="print_sheet">
+  <h2 id="p_title">Ricetta</h2>
+  <div class="print-line"><span>Impasto target (g)</span><b id="p_target">—</b></div>
+  <div class="print-line"><span>Impasto con margine</span><b id="p_target_m">—</b></div>
+  <div class="print-line"><span>Farina (g)</span><b id="p_farina">—</b></div>
+  <div class="print-line"><span>Acqua totale</span><b id="p_acqua">—</b></div>
+  <div class="print-line"><span>Sale (g)</span><b id="p_sale">—</b></div>
+  <div class="print-line"><span>Olio EVO (g)</span><b id="p_olio">—</b></div>
+  <div class="print-line"><span>Lievito birra fresco (g)</span><b id="p_lievito">—</b></div>
+  <div class="print-note"><b>NOTE:</b> <span id="p_note"></span></div>
+</div>
+
+<script>
+  // --- Parametri canonici (iniettati da Python) ---
+  const REF_YEAST = 3.5;
+  const REF_HOURS = 48;
+  const EXPONENT  = 1.1;
+
+  // Specchio esatto di calc_yeast_per_kg() in Python:
+  //   yeast_per_kg = reference_yeast_per_kg * (reference_hours / desired_hours) ** exponent
+  function calcYeastPerKg(refYeast, refHours, desiredHours, exponent) {
+    return +(refYeast * Math.pow(refHours / desiredHours, exponent)).toFixed(2);
+  }
+
+  function calcTotalYeastG(yeastPerKg, flourG) {
+    return +(yeastPerKg * flourG / 1000).toFixed(1);
+  }
+
+  const ids = ["n_teglie", "w_teglia", "ore", "margine"];
+  ids.forEach(id => document.getElementById(id).addEventListener("input", calc));
+  document.getElementById("print_note").addEventListener("input", updatePrintable);
+  document.getElementById("btn_print").addEventListener("click", () => {
+    updatePrintable();
+    window.print();
+  });
+
+  function r(v, dec = 0) {
+    return dec === 0 ? Math.round(v) : +v.toFixed(dec);
+  }
+
+  function fmt1(v) {
+    return Number(v).toFixed(1);
+  }
+
+  function set(id, val) {
+    document.getElementById(id).textContent = val;
+  }
+
+  function updatePrintable() {
+    const nT    = +document.getElementById("n_teglie").value || 1;
+    const ore   = +document.getElementById("ore").value      || REF_HOURS;
+    const marg  = +document.getElementById("margine").value  || 0;
+    const note  = document.getElementById("print_note").value.trim();
+
+    const targetTxt  = document.getElementById("target").textContent;
+    const targetMTxt = document.getElementById("target_m").textContent;
+    const farinaTxt  = document.getElementById("farina").textContent;
+    const acquaTxt   = document.getElementById("acqua").textContent;
+    const saleTxt    = document.getElementById("sale").textContent;
+    const olioTxt    = document.getElementById("olio").textContent;
+    const lievitoTxt = document.getElementById("lievito").textContent;
+    const autoInTxt  = document.getElementById("auto_in").textContent;
+    const autoFinTxt = document.getElementById("auto_fin").textContent;
+
+    set("p_title", `Ricetta per ${nT} teglie, idratazione 72%, lievitazione ${ore} ore`);
+    set("p_target", targetTxt);
+    set("p_target_m", `${targetMTxt} (margine ${marg}%)`);
+    set("p_farina", farinaTxt);
+    set("p_acqua", `${acquaTxt} (${autoInTxt} autolisi + ${autoFinTxt} dopo)`);
+    set("p_sale", saleTxt);
+    set("p_olio", olioTxt);
+    set("p_lievito", lievitoTxt);
+    set("p_note", note || "");
+  }
+
+  function calc() {
+    const nT   = +document.getElementById("n_teglie").value || 1;
+    const wT   = +document.getElementById("w_teglia").value || 0;
+    const ore  = +document.getElementById("ore").value      || REF_HOURS;
+    const marg = +document.getElementById("margine").value  || 0;
+
+    const lievGkg = calcYeastPerKg(REF_YEAST, REF_HOURS, ore, EXPONENT);
+    // farina = impasto / (1 + 0.72 + 0.025 + 0.03 + lievGkg/1000)
+    const target  = r(nT * wT);
+    const targetM = r(target * (1 + marg / 100));
+    const farina  = r(targetM / (1 + 0.72 + 0.025 + 0.03 + lievGkg / 1000));
+    const acqua   = r(farina * 0.72);
+    const sale    = r(farina * 0.025);
+    const olio    = r(farina * 0.03);
+    const lievito = calcTotalYeastG(lievGkg, farina);
+    const autoIn  = r(acqua * 0.9);
+    const autoFin = r(acqua * 0.1);
+
+    set("liev_gkg", lievGkg  + " g/kg");
+    set("target",   target   + " g");
+    set("target_m", targetM  + " g");
+    set("farina",   farina   + " g");
+    set("acqua",    acqua    + " g");
+    set("sale",     sale     + " g");
+    set("olio",     olio     + " g");
+    set("lievito",  fmt1(lievito) + " g");
+    set("auto_in",  autoIn   + " g");
+    set("auto_fin", autoFin  + " g");
+
+    set("t_farina",  r(farina  / nT)    + " g");
+    set("t_acqua",   r(acqua   / nT)    + " g");
+    set("t_sale",    r(sale    / nT) + " g");
+    set("t_olio",    r(olio    / nT) + " g");
+    set("t_lievito", fmt1(lievito / nT) + " g");
+    set("t_impasto", r(targetM / nT)    + " g");
+
+    const av = document.getElementById("avviso");
+    if (ore < 24) {
+      av.textContent = "⚠️ Maturazione breve (< 24 h) — rischio impasto poco sviluppato";
+      av.className = "warn";
+    } else if (ore > 72) {
+      av.textContent = "⚠️ Maturazione lunga (> 72 h) — rischio impasto troppo avanti";
+      av.className = "warn";
+    } else {
+      av.textContent = "✅ OK: dentro zona di maturazione consigliata (24–72 h)";
+      av.className = "ok";
+    }
+
+    updatePrintable();
+  }
+
+  calc();
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js");
+  });
+}
+</script>
+</body>
+</html>
