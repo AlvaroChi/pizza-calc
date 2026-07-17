@@ -67,14 +67,21 @@
     text-align: right;
     background: var(--giallo);
   }
-  input[type=datetime-local] {
-    width: 210px;
+  #data_cottura {
+    width: 130px;
     padding: 6px 8px;
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: .95rem;
     background: var(--giallo);
   }
+  .time-input {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 700;
+  }
+  .time-input input[type=number] { width: 64px; }
   input[type=text] {
     width: 100%;
     padding: 6px 8px;
@@ -84,7 +91,7 @@
     background: #fff;
   }
   input[type=number]:focus,
-  input[type=datetime-local]:focus {
+  #data_cottura:focus {
     outline: 2px solid var(--marrone);
     border-color: var(--marrone);
   }
@@ -224,7 +231,7 @@
   }
   @media (max-width: 480px) {
     input[type=number] { width: 80px; }
-    input[type=datetime-local] { width: 175px; }
+    #data_cottura { width: 125px; }
     .timeline li { grid-template-columns: 1fr; gap: 2px; }
   }
 </style>
@@ -237,8 +244,16 @@
 <div class="card">
   <h2>1) Input e pianificazione</h2>
   <div class="row">
-    <label>Data e ora previste di cottura</label>
-    <input type="datetime-local" id="data_cottura">
+    <label>Data prevista di cottura (GG/MM/AAAA)</label>
+    <input type="text" id="data_cottura" inputmode="numeric" placeholder="GG/MM/AAAA" maxlength="10">
+  </div>
+  <div class="row">
+    <label>Ora prevista di cottura</label>
+    <div class="time-input">
+      <input type="number" id="ora_cottura" value="18" min="0" max="23" step="1" aria-label="Ora cottura">
+      <span>:</span>
+      <input type="number" id="minuto_cottura" value="0" min="0" max="59" step="1" aria-label="Minuti cottura">
+    </div>
   </div>
   <div class="row">
     <label>Numero teglie</label>
@@ -403,7 +418,7 @@
   }
 
   const ids = [
-    "data_cottura", "n_teglie", "w_teglia", "ore_frigo", "puntata_post",
+    "data_cottura", "ora_cottura", "minuto_cottura", "n_teglie", "w_teglia", "ore_frigo", "puntata_post",
     "appretto", "puntata_pre", "n_pieghe", "impasto_min",
     "autolisi_min", "margine"
   ];
@@ -436,9 +451,26 @@
     return new Date(date.getTime() + minutes * 60_000);
   }
 
-  function toLocalInputValue(date) {
+  function formatDateInput(date) {
     const pad = value => String(value).padStart(2, "0");
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
+  }
+
+  function parseCookingDate() {
+    const raw = document.getElementById("data_cottura").value.trim();
+    const match = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (!match) return new Date(NaN);
+    const day = Number(match[1]);
+    const month = Number(match[2]);
+    const year = Number(match[3]);
+    const hour = readNumber("ora_cottura", 18);
+    const minute = readNumber("minuto_cottura", 0);
+    if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return new Date(NaN);
+    const date = new Date(year, month - 1, day, hour, minute, 0, 0);
+    if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+      return new Date(NaN);
+    }
+    return date;
   }
 
   function setDefaultCookingDate() {
@@ -447,7 +479,9 @@
     const date = new Date();
     date.setDate(date.getDate() + 3);
     date.setHours(18, 0, 0, 0);
-    input.value = toLocalInputValue(date);
+    input.value = formatDateInput(date);
+    document.getElementById("ora_cottura").value = date.getHours();
+    document.getElementById("minuto_cottura").value = date.getMinutes();
   }
 
   function formatDateTime(date) {
@@ -512,7 +546,7 @@
     const ore   = readNumber("ore_frigo", REF_HOURS);
     const marg  = +document.getElementById("margine").value  || 0;
     const note  = document.getElementById("print_note").value.trim();
-    const cookingAt = new Date(document.getElementById("data_cottura").value);
+    const cookingAt = parseCookingDate();
 
     const targetTxt  = document.getElementById("target").textContent;
     const targetMTxt = document.getElementById("target_m").textContent;
@@ -551,7 +585,7 @@
       autolysisMinutes: readNumber("autolisi_min", DEFAULT_AUTOLYSIS_MINUTES),
       foldCount: Math.max(0, Math.round(readNumber("n_pieghe", DEFAULT_FOLD_COUNT)))
     };
-    const cookingAt = new Date(document.getElementById("data_cottura").value);
+    const cookingAt = parseCookingDate();
 
     const lievGkg = calcYeastPerKg(REF_YEAST, REF_HOURS, ore, EXPONENT);
     // farina = impasto / (1 + 0.72 + 0.025 + 0.03 + lievGkg/1000)
