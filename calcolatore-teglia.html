@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="pizza-calculator-build" content="20260719-001909+0200">
 <title>Calcolatore Pizza in Teglia</title>
 <style>
   :root {
@@ -28,6 +29,12 @@
     padding: 14px;
     border-radius: var(--radius);
     font-size: 1.1rem;
+    margin-bottom: 6px;
+  }
+  .build-version {
+    text-align: center;
+    color: #666;
+    font-size: .75rem;
     margin-bottom: 16px;
   }
   .card {
@@ -225,7 +232,7 @@
       color: #000;
       font-size: 12pt;
     }
-    h1, .card, .actions { display: none !important; }
+    h1, .build-version, .card, .actions { display: none !important; }
     .print-sheet { display: block !important; }
     @page { margin: 12mm; }
   }
@@ -236,9 +243,10 @@
   }
 </style>
 </head>
-<body>
+<body data-build-version="20260719-001909+0200">
 
 <h1>🍕 Calcolatore Pizza in Teglia 72% — precottura rossa</h1>
+<p class="build-version">Versione HTML: <strong>20260719-001909+0200</strong></p>
 
 <!-- INPUT -->
 <div class="card">
@@ -403,6 +411,7 @@
   <div class="print-line"><span>Temperatura ambiente post-frigo</span><b id="p_temp_ambiente">—</b></div>
   <div class="print-line"><span>Esposizione calda fino alla stesura</span><b id="p_esposizione_calda">—</b></div>
   <div class="print-line"><span>Stesura, condimento e riposo finale</span><b id="p_pre_cottura">—</b></div>
+  <div class="print-line"><span>Versione calcolatore</span><b>20260719-001909+0200</b></div>
   <h2 style="margin-top: 16px">Calendario operativo</h2>
   <ol class="timeline" id="p_timeline"></ol>
   <div class="print-note"><b>NOTE:</b> <span id="p_note"></span></div>
