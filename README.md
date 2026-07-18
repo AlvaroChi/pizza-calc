@@ -1,35 +1,56 @@
-# app-public/
+# Pizza Tools
 
-Questa cartella contiene **solo i file destinati alla pubblicazione pubblica** tramite GitHub Pages.
+Una piccola applicazione web per calcolare ingredienti e tempi di preparazione degli impasti per pizza.
 
-Il contenuto viene copiato automaticamente nella repository pubblica
-[AlvaroChi/pizza-calc](https://github.com/AlvaroChi/pizza-calc)
-ogni volta che viene fatto push su `main` con modifiche in questa cartella.
+Il progetto comprende due calcolatori:
 
----
+- **Pizza napoletana al 65% di idratazione**, con gestione di panetti baby e standard;
+- **Pizza in teglia al 72% di idratazione**, con dosi totali e quantità per singola teglia.
 
-## Non inserire qui
+## Funzionalità
 
-- ricette private
-- storici di produzione
-- note personali
-- formule sperimentali
-- foto private
-- dati personali
+- calcolo automatico di farina, acqua, sale, lievito e, per la teglia, olio EVO;
+- pianificazione a ritroso a partire dalla data e dall'ora di cottura;
+- stima del lievito fresco in base ai tempi di maturazione e fermentazione;
+- suddivisione dell'acqua tra autolisi e impasto finale;
+- margine extra configurabile;
+- avvisi operativi e riepilogo stampabile;
+- interfaccia adatta anche a smartphone;
+- disponibilità offline dopo il primo caricamento, tramite service worker.
 
----
+## Utilizzo
 
-## Contenuto atteso
+Apri **[Pizza Tools](https://alvarochi.github.io/pizza-calc/)** nel browser e scegli il calcolatore desiderato. Modificando i valori di input, ricetta e calendario operativo vengono aggiornati automaticamente.
+
+Le quantità e le tempistiche ottenute sono indicazioni pratiche: temperatura, farina, lievito e condizioni ambientali possono influire sul risultato. È quindi consigliabile adattarle alla propria esperienza e al proprio impasto.
+
+## Esecuzione in locale
+
+Non sono richieste dipendenze né una procedura di compilazione. È sufficiente servire la cartella con un qualsiasi server HTTP statico, per esempio con Python:
+
+```bash
+python -m http.server 8000
+```
+
+Poi visita `http://localhost:8000`.
+
+> Il service worker non funziona aprendo direttamente i file con il protocollo `file://`; per provare la modalità offline occorre usare `localhost` o HTTPS.
+
+## Struttura del progetto
 
 | File | Descrizione |
-|------|-------------|
-| `index.html` | Pagina menu principale (PWA) |
-| `calcolatore-napoletana.html` | Calcolatore pizza napoletana 65% |
-| `calcolatore-teglia.html` | Calcolatore pizza in teglia 72% |
-| `manifest.json` | Manifest PWA |
-| `service-worker.js` | Service worker per uso offline |
-| `icons/icon-192.png` | Icona PWA 192×192 *(da creare manualmente)* |
-| `icons/icon-512.png` | Icona PWA 512×512 *(da creare manualmente)* |
+| --- | --- |
+| `index.html` | Pagina iniziale e selezione del calcolatore |
+| `calcolatore-napoletana.html` | Calcolatore per pizza napoletana al 65% |
+| `calcolatore-teglia.html` | Calcolatore per pizza in teglia al 72% |
+| `manifest.json` | Configurazione della Progressive Web App |
+| `service-worker.js` | Cache dei file per l'utilizzo offline |
+| `icons/` | Risorse per le icone dell'app |
 
-> Tutto quello che si trova in questa cartella può essere copiato automaticamente
-> nella repository pubblica.
+## Tecnologie
+
+Il progetto usa soltanto HTML, CSS e JavaScript, senza framework o dipendenze esterne.
+
+## Contributi
+
+Segnalazioni di problemi e proposte di miglioramento sono benvenute tramite le issue e le pull request del repository.
