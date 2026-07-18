@@ -3,485 +3,273 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="pizza-calculator-build" content="20260719-001909+0200">
+<meta name="pizza-calculator-build" content="20260719-004949+0200">
 <title>Calcolatore Pizza in Teglia</title>
 <style>
   :root {
-    --marrone:  #3E2723;
-    --marrone-l:#EFEBE9;
-    --giallo:   #FFF9C4;
-    --verde:    #E8F5E9;
-    --output:   #E3F2FD;
-    --crv:      #F3E5F5;
-    --radius:   8px;
+    --marrone: #3E2723;
+    --marrone-l: #EFEBE9;
+    --giallo: #FFF9C4;
+    --verde: #E8F5E9;
+    --blu: #E3F2FD;
+    --radius: 10px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    font-family: system-ui, sans-serif;
-    background: #f5f5f5;
+    max-width: 760px;
+    margin: 0 auto;
     padding: 16px;
+    background: #f5f5f5;
     color: #222;
+    font-family: system-ui, sans-serif;
   }
   h1 {
+    padding: 16px;
+    border-radius: var(--radius);
     background: var(--marrone);
     color: #fff;
     text-align: center;
-    padding: 14px;
-    border-radius: var(--radius);
-    font-size: 1.1rem;
-    margin-bottom: 6px;
+    font-size: 1.25rem;
   }
-  .build-version {
-    text-align: center;
-    color: #666;
-    font-size: .75rem;
-    margin-bottom: 16px;
-  }
+  .subtitle, .build-version { text-align: center; color: #666; }
+  .subtitle { margin: 8px 0 2px; font-size: .92rem; }
+  .build-version { margin-bottom: 16px; font-size: .7rem; }
   .card {
-    background: #fff;
-    border-radius: var(--radius);
-    padding: 16px;
     margin-bottom: 14px;
-    box-shadow: 0 1px 4px rgba(0,0,0,.1);
+    padding: 16px;
+    border-radius: var(--radius);
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .1);
   }
   .card h2 {
-    font-size: .8rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .05em;
+    margin-bottom: 12px;
+    padding: 7px 10px;
+    border-radius: 5px;
     background: var(--marrone-l);
     color: var(--marrone);
-    padding: 6px 10px;
-    border-radius: 4px;
-    margin-bottom: 12px;
+    font-size: .82rem;
+    letter-spacing: .04em;
+    text-transform: uppercase;
   }
   .row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 6px 0;
+    gap: 12px;
+    padding: 9px 0;
     border-bottom: 1px solid #eee;
-    gap: 8px;
   }
-  .row:last-child { border-bottom: none; }
-  label { font-size: .9rem; flex: 1; }
-  input[type=number] {
-    width: 90px;
-    padding: 6px 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: .95rem;
+  .row:last-child { border-bottom: 0; }
+  label { flex: 1; font-size: .95rem; }
+  input {
+    padding: 8px;
+    border: 1px solid #bbb;
+    border-radius: 5px;
+    background: var(--giallo);
+    font: inherit;
     text-align: right;
-    background: var(--giallo);
   }
-  #data_cottura {
-    width: 130px;
-    padding: 6px 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: .95rem;
-    background: var(--giallo);
+  input:focus { outline: 2px solid var(--marrone); border-color: var(--marrone); }
+  input[type=number] { width: 90px; }
+  #data_cottura { width: 132px; }
+  .time-input { display: flex; align-items: center; gap: 4px; font-weight: 700; }
+  .time-input input { width: 62px; }
+  #print_note { width: 100%; background: #fff; text-align: left; }
+  .start-box {
+    padding: 14px;
+    border-radius: 7px;
+    background: var(--verde);
+    color: #1B5E20;
+    text-align: center;
   }
-  .time-input {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-weight: 700;
-  }
-  .time-input input[type=number] { width: 64px; }
-  input[type=text] {
-    width: 100%;
-    padding: 6px 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: .95rem;
-    background: #fff;
-  }
-  input[type=number]:focus,
-  #data_cottura:focus {
-    outline: 2px solid var(--marrone);
-    border-color: var(--marrone);
-  }
-  input[type=text]:focus {
-    outline: 2px solid var(--marrone);
-    border-color: var(--marrone);
-  }
-  .out-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 7px 10px;
-    border-radius: 4px;
-    background: var(--output);
-    margin-bottom: 6px;
-    font-weight: 600;
-  }
-  .out-row span:last-child { font-size: 1.05rem; color: var(--marrone); }
-  .crv-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 5px 8px;
-    background: var(--crv);
-    border-radius: 4px;
-    margin-bottom: 4px;
-    font-size: .88rem;
-  }
-  .crv-row b { color: var(--marrone); }
-  .fix-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 5px 0;
-    font-size: .88rem;
-    border-bottom: 1px solid #eee;
-  }
-  .fix-row:last-child { border-bottom: none; }
-  .fix-val { background: var(--verde); padding: 2px 8px; border-radius: 4px; font-weight: 600; }
-  .formula-box {
-    background: #f5f5f5;
-    border-radius: 4px;
-    padding: 10px;
-    font-size: .82rem;
-    color: #555;
-    line-height: 1.7;
-    margin-top: 8px;
-  }
-  .formula-box b { color: var(--marrone); }
-  .timeline {
-    list-style: none;
-  }
+  .start-box span { display: block; font-size: .83rem; }
+  .start-box strong { display: block; margin-top: 3px; font-size: 1.18rem; }
+  .timeline { list-style: none; margin-top: 12px; }
   .timeline li {
     display: grid;
-    grid-template-columns: minmax(135px, 170px) 1fr;
+    grid-template-columns: minmax(145px, 180px) 1fr;
     gap: 10px;
-    padding: 8px 10px;
-    border-left: 4px solid var(--marrone);
+    padding: 9px 10px;
     border-bottom: 1px solid #eee;
-    background: #fff;
+    border-left: 4px solid var(--marrone);
   }
   .timeline li:nth-child(even) { background: #fafafa; }
-  .timeline time {
-    color: var(--marrone);
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-  }
-  .timeline .detail {
-    display: block;
-    color: #666;
-    font-size: .8rem;
-    margin-top: 2px;
-  }
-  .note {
-    font-size: .82rem;
-    color: #555;
-    background: #f5f5f5;
-    padding: 8px 10px;
-    border-radius: 4px;
-    margin-top: 8px;
-    line-height: 1.5;
-  }
-  #avviso {
-    padding: 10px 14px;
-    border-radius: 4px;
-    font-weight: 600;
-    font-size: .9rem;
-  }
-  .ok   { background: #C8E6C9; color: #1B5E20; }
-  .warn { background: #FFE0B2; color: #E65100; }
-  .actions {
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
-    margin-bottom: 14px;
-  }
-  .btn {
-    border: 0;
-    border-radius: 6px;
-    padding: 10px 12px;
-    font-weight: 700;
-    cursor: pointer;
-    background: var(--marrone);
-    color: #fff;
-  }
-  .print-sheet {
-    display: none;
-    background: #fff;
-    color: #000;
-    padding: 10px 0;
-  }
-  .print-sheet h2 {
-    font-size: 1rem;
-    margin-bottom: 8px;
-  }
-  .print-line {
+  .timeline time { color: var(--marrone); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .detail { display: block; margin-top: 2px; color: #666; font-size: .8rem; }
+  .out-row, .fix-row {
     display: flex;
     justify-content: space-between;
-    padding: 4px 0;
-    border-bottom: 1px solid #ddd;
-    gap: 8px;
+    gap: 10px;
+    margin-bottom: 6px;
+    padding: 8px 10px;
+    border-radius: 5px;
   }
-  .print-note {
-    margin-top: 12px;
-    border-top: 1px solid #ddd;
-    padding-top: 8px;
+  .out-row { background: var(--blu); font-weight: 600; }
+  .out-row span:last-child { color: var(--marrone); font-size: 1.05rem; }
+  .fix-row { background: #fafafa; font-size: .88rem; }
+  .fix-row b { color: var(--marrone); text-align: right; }
+  .note, .notice {
+    margin-top: 9px;
+    padding: 10px;
+    border-radius: 5px;
+    color: #555;
+    background: #f5f5f5;
+    font-size: .83rem;
+    line-height: 1.5;
+  }
+  .notice { background: #FFF3E0; color: #8D4B00; }
+  .notice.ok { background: var(--verde); color: #1B5E20; }
+  .actions { display: flex; justify-content: flex-end; margin-bottom: 14px; }
+  .btn {
+    padding: 11px 14px;
+    border: 0;
+    border-radius: 6px;
+    background: var(--marrone);
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .print-sheet { display: none; background: #fff; color: #000; }
+  .print-sheet h2 { margin: 12px 0 6px; font-size: 1rem; }
+  .print-line { display: flex; justify-content: space-between; gap: 8px; padding: 4px 0; border-bottom: 1px solid #ddd; }
+  @media (max-width: 520px) {
+    body { padding: 10px; }
+    .row { align-items: flex-start; }
+    .timeline li { grid-template-columns: 1fr; gap: 2px; }
   }
   @media print {
-    body {
-      background: #fff;
-      padding: 0;
-      color: #000;
-      font-size: 12pt;
-    }
-    h1, .build-version, .card, .actions { display: none !important; }
+    body { max-width: none; padding: 0; background: #fff; color: #000; font-size: 11pt; }
+    h1, .subtitle, .build-version, .card, .actions { display: none !important; }
     .print-sheet { display: block !important; }
     @page { margin: 12mm; }
   }
-  @media (max-width: 480px) {
-    input[type=number] { width: 80px; }
-    #data_cottura { width: 125px; }
-    .timeline li { grid-template-columns: 1fr; gap: 2px; }
-  }
 </style>
 </head>
-<body data-build-version="20260719-001909+0200">
+<body data-build-version="20260719-004949+0200">
+<h1>🍕 Pizza in teglia 72%</h1>
+<p class="subtitle">Dimmi quando vuoi cuocere. Al resto pensiamo noi.</p>
+<p class="build-version">Versione 20260719-004949+0200</p>
 
-<h1>🍕 Calcolatore Pizza in Teglia 72% — precottura rossa</h1>
-<p class="build-version">Versione HTML: <strong>20260719-001909+0200</strong></p>
-
-<!-- INPUT -->
 <div class="card">
-  <h2>1) Input e pianificazione</h2>
+  <h2>1) La tua produzione</h2>
   <div class="row">
-    <label>Data prevista di cottura (GG/MM/AAAA)</label>
+    <label for="data_cottura">Giorno della cottura</label>
     <input type="text" id="data_cottura" inputmode="numeric" placeholder="GG/MM/AAAA" maxlength="10">
   </div>
   <div class="row">
-    <label>Ora prevista di cottura</label>
+    <label>Ora della cottura</label>
     <div class="time-input">
-      <input type="number" id="ora_cottura" value="18" min="0" max="23" step="1" aria-label="Ora cottura">
+      <input type="number" id="ora_cottura" value="19" min="0" max="23" step="1" aria-label="Ora cottura">
       <span>:</span>
       <input type="number" id="minuto_cottura" value="0" min="0" max="59" step="1" aria-label="Minuti cottura">
     </div>
   </div>
   <div class="row">
-    <label>Numero teglie</label>
-    <input type="number" id="n_teglie" value="5" min="1" step="1">
+    <label for="n_teglie">Numero di teglie</label>
+    <input type="number" id="n_teglie" value="2" min="1" step="1">
   </div>
   <div class="row">
-    <label>Peso impasto per teglia (g)</label>
+    <label for="w_teglia">Grammi di impasto per teglia</label>
     <input type="number" id="w_teglia" value="715" min="300" step="5">
   </div>
-  <div class="row">
-    <label>Ore effettive in frigo a 4 °C</label>
-    <input type="number" id="ore_frigo" value="41" min="1" step="0.25">
-  </div>
-  <div class="row">
-    <label>Puntata in massa dopo il frigo (h)</label>
-    <input type="number" id="puntata_post" value="2.75" min="0" step="0.25">
-  </div>
-  <div class="row">
-    <label>Appretto dopo lo staglio (h)</label>
-    <input type="number" id="appretto" value="2.25" min="0.5" step="0.25">
-  </div>
-  <div class="row">
-    <label>Temperatura ambiente post-frigo (°C)</label>
-    <input type="number" id="temp_ambiente" value="25.5" min="5" max="40" step="0.5">
-  </div>
-  <div class="row">
-    <label>Stesura, condimento e riposo finale (min)</label>
-    <input type="number" id="pre_cottura_min" value="30" min="0" step="5">
-  </div>
-  <div class="row">
-    <label>Prima puntata e pieghe (min)</label>
-    <input type="number" id="puntata_pre" value="35" min="0" step="5">
-  </div>
-  <div class="row">
-    <label>Numero serie di pieghe</label>
-    <input type="number" id="n_pieghe" value="3" min="0" max="6" step="1">
-  </div>
-  <div class="row">
-    <label>Durata impasto (min)</label>
-    <input type="number" id="impasto_min" value="15" min="1" step="1">
-  </div>
-  <div class="row">
-    <label>Durata autolisi (min)</label>
-    <input type="number" id="autolisi_min" value="45" min="0" step="5">
-  </div>
-  <div class="row">
-    <label>Margine extra (%)</label>
-    <input type="number" id="margine" value="0" min="0" max="20" step="1">
-  </div>
-  <p class="note">Profilo iniziale osservato a 25–26 °C: circa 2 h 45 min in massa e 2 h 15 min di appretto, per 5 h fino alla stesura. Seguono stesura, condimento e riposo finale. Per un appretto prevalentemente refrigerato, impostare manualmente le durate e verificare visivamente l'impasto.</p>
+  <p class="note">Usiamo automaticamente il profilo <b>Standard 22 ore</b>. Non devi scegliere lievito, frigorifero, puntata o appretto.</p>
 </div>
 
-<!-- CALENDARIO -->
 <div class="card">
-  <h2>2) Calendario operativo a ritroso</h2>
+  <h2>2) Il tuo programma</h2>
+  <div class="start-box">
+    <span>Comincia da qui</span>
+    <strong id="start_summary">—</strong>
+  </div>
   <ol class="timeline" id="timeline"></ol>
-  <div class="fix-row"><span>Esposizione calda fino alla stesura</span><span class="fix-val" id="esposizione_calda">—</span></div>
-</div>
-
-<!-- FORMULA LIEVITO -->
-<div class="card">
-  <h2>3) Formula lievito</h2>
-  <div class="crv-row"><span>Lievito riferimento</span><b id="ref_gy">3.5 g/kg</b></div>
-  <div class="crv-row"><span>Frigo di riferimento</span><b>41 h a 4 °C</b></div>
-  <div class="crv-row"><span>Esponente</span><b>0.75</b></div>
-  <div class="crv-row"><span>Lievito calcolato (g/kg)</span><b id="liev_gkg">—</b></div>
-  <div class="formula-box">
-    <b>lievito (g/kg) = ref_g_kg × (ore_rif / ore_desiderate) ^ esponente</b><br>
-    Le ore sono ore effettive in frigorifero; appretto e puntate sono pianificati separatamente.<br>
-    Con esponente = 1.00 → proporzione inversa semplice.<br>
-    Con esponente = 0.75 → estrapolazione prudente sui cicli corti. Il riferimento a 41 h è osservato; le dosi sui cicli corti restano da validare direttamente.
-  </div>
-</div>
-
-<!-- PARAMETRI FISSI -->
-<div class="card">
-  <h2>4) Parametri fissi</h2>
-  <div class="fix-row"><span>Idratazione</span><span class="fix-val">72%</span></div>
-  <div class="fix-row"><span>Sale</span><span class="fix-val">25 g/kg farina (2.5%)</span></div>
-  <div class="fix-row"><span>Olio EVO</span><span class="fix-val">30 g/kg farina (3%)</span></div>
-  <div class="fix-row"><span>Autolisi acqua</span><span class="fix-val">90% dell'acqua totale</span></div>
-  <div class="fix-row"><span>Profilo termico osservato</span><span class="fix-val">5 h fino alla stesura a 25–26 °C</span></div>
-  <div class="fix-row"><span>Appretto osservato</span><span class="fix-val">circa 2 h 15 min a 25–26 °C</span></div>
-  <div class="fix-row"><span>Metodo</span><span class="fix-val">Precottura base rossa + rigenerazione</span></div>
-</div>
-
-<!-- RICETTA TOTALE -->
-<div class="card">
-  <h2>5) Ricetta totale</h2>
-  <div class="out-row"><span>Impasto target (g)</span><span id="target">—</span></div>
-  <div class="out-row"><span>Impasto con margine (g)</span><span id="target_m">—</span></div>
-  <div class="out-row"><span>Farina totale (g)</span><span id="farina">—</span></div>
-  <div class="out-row"><span>Acqua totale (g)</span><span id="acqua">—</span></div>
-  <div class="out-row"><span>Sale totale (g)</span><span id="sale">—</span></div>
-  <div class="out-row"><span>Olio EVO totale (g)</span><span id="olio">—</span></div>
-  <div class="out-row"><span>Lievito fresco totale (g)</span><span id="lievito">—</span></div>
-</div>
-
-<!-- AUTOLISI -->
-<div class="card">
-  <h2>6) Autolisi</h2>
-  <div class="out-row"><span>Acqua in autolisi (g)</span><span id="auto_in">—</span></div>
-  <div class="out-row"><span>Acqua finale (g)</span><span id="auto_fin">—</span></div>
-  <div class="fix-row"><span>Durata pianificata</span><span class="fix-val" id="durata_autolisi">—</span></div>
-  <p class="note">Ordine aggiunta: lievito nell'acqua finale → ad incordatura avvenuta aggiungere sale, poi olio a filo.</p>
-</div>
-
-<!-- PER SINGOLA TEGLIA -->
-<div class="card">
-  <h2>7) Per singola teglia</h2>
-  <div class="out-row"><span>Farina (g)</span><span id="t_farina">—</span></div>
-  <div class="out-row"><span>Acqua (g)</span><span id="t_acqua">—</span></div>
-  <div class="out-row"><span>Sale (g)</span><span id="t_sale">—</span></div>
-  <div class="out-row"><span>Olio EVO (g)</span><span id="t_olio">—</span></div>
-  <div class="out-row"><span>Lievito fresco (g)</span><span id="t_lievito">—</span></div>
-  <div class="out-row"><span>Peso impasto (g)</span><span id="t_impasto">—</span></div>
-</div>
-
-<!-- AVVISO -->
-<div class="card">
-  <h2>8) Avvisi operativi</h2>
-  <div id="avviso" class="ok">✅ OK: dentro zona di maturazione consigliata (24–72 h)</div>
-  <div id="avviso_appretto" class="ok" style="margin-top: 8px">✅ Esposizione calda coerente con il profilo osservato</div>
+  <div id="schedule_notice" class="notice ok">Il programma è pronto.</div>
 </div>
 
 <div class="card">
-  <h2>9) Stampa</h2>
+  <h2>3) Ingredienti totali</h2>
+  <div class="out-row"><span>Impasto</span><span id="target">—</span></div>
+  <div class="out-row"><span>Farina</span><span id="farina">—</span></div>
+  <div class="out-row"><span>Acqua</span><span id="acqua">—</span></div>
+  <div class="out-row"><span>Sale</span><span id="sale">—</span></div>
+  <div class="out-row"><span>Olio EVO</span><span id="olio">—</span></div>
+  <div class="out-row"><span>Lievito di birra fresco</span><span id="lievito">—</span></div>
+</div>
+
+<div class="card">
+  <h2>4) Preparazione dell'impasto</h2>
+  <div class="fix-row"><span>Acqua per l'autolisi</span><b id="auto_in">—</b></div>
+  <div class="fix-row"><span>Acqua da aggiungere dopo</span><b id="auto_fin">—</b></div>
+  <p class="note">Metti il lievito nell'acqua finale. Quando l'impasto è incordato aggiungi il sale, poi l'olio a filo.</p>
+</div>
+
+<div class="card">
+  <h2>Profilo utilizzato</h2>
+  <div class="fix-row"><span>Durata totale</span><b>21 h 40 min</b></div>
+  <div class="fix-row"><span>Frigorifero</span><b>14 h 35 min a circa 4 °C</b></div>
+  <div class="fix-row"><span>Fuori frigorifero dopo il freddo</span><b>5 h a circa 25–26 °C</b></div>
+  <div class="notice">Profilo sperimentale: la dose corta è prudenziale ma deve ancora essere confermata con una prova dedicata. Controlla sempre visivamente che l'impasto sia gonfio, rilassato e ancora sostenuto.</div>
+</div>
+
+<div class="card">
+  <h2>Stampa</h2>
   <div class="row">
-    <label>Note stampa</label>
-    <input type="text" id="print_note" placeholder="Scrivi una nota breve (opzionale)">
+    <label for="print_note">Nota facoltativa</label>
+    <input type="text" id="print_note" placeholder="Evento, luogo o promemoria">
   </div>
 </div>
-
-<div class="actions">
-  <button type="button" class="btn" id="btn_print">Stampa ricetta</button>
-</div>
+<div class="actions"><button type="button" class="btn" id="btn_print">Stampa programma</button></div>
 
 <div class="print-sheet" id="print_sheet">
-  <h2 id="p_title">Ricetta</h2>
-  <div class="print-line"><span>Impasto target (g)</span><b id="p_target">—</b></div>
-  <div class="print-line"><span>Impasto con margine</span><b id="p_target_m">—</b></div>
-  <div class="print-line"><span>Farina (g)</span><b id="p_farina">—</b></div>
-  <div class="print-line"><span>Acqua totale</span><b id="p_acqua">—</b></div>
-  <div class="print-line"><span>Sale (g)</span><b id="p_sale">—</b></div>
-  <div class="print-line"><span>Olio EVO (g)</span><b id="p_olio">—</b></div>
-  <div class="print-line"><span>Lievito birra fresco (g)</span><b id="p_lievito">—</b></div>
-  <div class="print-line"><span>Temperatura ambiente post-frigo</span><b id="p_temp_ambiente">—</b></div>
-  <div class="print-line"><span>Esposizione calda fino alla stesura</span><b id="p_esposizione_calda">—</b></div>
-  <div class="print-line"><span>Stesura, condimento e riposo finale</span><b id="p_pre_cottura">—</b></div>
-  <div class="print-line"><span>Versione calcolatore</span><b>20260719-001909+0200</b></div>
-  <h2 style="margin-top: 16px">Calendario operativo</h2>
+  <h2 id="p_title">Pizza in teglia</h2>
+  <div class="print-line"><span>Impasto</span><b id="p_target">—</b></div>
+  <div class="print-line"><span>Farina</span><b id="p_farina">—</b></div>
+  <div class="print-line"><span>Acqua</span><b id="p_acqua">—</b></div>
+  <div class="print-line"><span>Sale</span><b id="p_sale">—</b></div>
+  <div class="print-line"><span>Olio EVO</span><b id="p_olio">—</b></div>
+  <div class="print-line"><span>Lievito fresco</span><b id="p_lievito">—</b></div>
+  <div class="print-line"><span>Acqua autolisi</span><b id="p_auto_in">—</b></div>
+  <div class="print-line"><span>Acqua finale</span><b id="p_auto_fin">—</b></div>
+  <h2>Calendario operativo</h2>
   <ol class="timeline" id="p_timeline"></ol>
-  <div class="print-note"><b>NOTE:</b> <span id="p_note"></span></div>
+  <p style="margin-top:12px"><b>Nota:</b> <span id="p_note"></span></p>
+  <p style="margin-top:12px;font-size:.8rem">Profilo Standard 22 ore · versione 20260719-004949+0200</p>
 </div>
 
 <script>
-  // --- Parametri canonici (iniettati da Python) ---
-  const REF_YEAST = 3.5;
-  const REF_HOURS = 41;
-  const EXPONENT  = 0.75;
-  const DEFAULT_AMBIENT_TEMP_C = 25.5;
-  const VALIDATED_AMBIENT_TEMP_MIN_C = 24.5;
-  const VALIDATED_AMBIENT_TEMP_MAX_C = 26.5;
-  const REF_WARM_EXPOSURE_HOURS = 5.0;
-  const WARM_EXPOSURE_TOLERANCE_HOURS = 0.5;
-  const DEFAULT_PROOF_HOURS = 2.25;
-  const DEFAULT_POST_COLD_BULK_HOURS = 2.75;
-  const DEFAULT_PRE_COLD_BULK_MINUTES = 35;
-  const DEFAULT_MIXING_MINUTES = 15;
-  const DEFAULT_AUTOLYSIS_MINUTES = 45;
-  const DEFAULT_FOLD_COUNT = 3;
-  const DEFAULT_PRE_BAKE_MINUTES = 30;
-
-  // Specchio esatto di calc_yeast_per_kg() in Python:
-  //   yeast_per_kg = reference_yeast_per_kg * (reference_hours / desired_hours) ** exponent
-  function calcYeastPerKg(refYeast, refHours, desiredHours, exponent) {
-    return +(refYeast * Math.pow(refHours / desiredHours, exponent)).toFixed(2);
-  }
-
-  function calcTotalYeastG(yeastPerKg, flourG) {
-    return +(yeastPerKg * flourG / 1000).toFixed(1);
-  }
-
-  const ids = [
-    "data_cottura", "ora_cottura", "minuto_cottura", "n_teglie", "w_teglia", "ore_frigo", "puntata_post",
-    "appretto", "temp_ambiente", "pre_cottura_min", "puntata_pre", "n_pieghe", "impasto_min",
-    "autolisi_min", "margine"
-  ];
-  ids.forEach(id => document.getElementById(id).addEventListener("input", calc));
-  document.getElementById("print_note").addEventListener("input", updatePrintable);
-  document.getElementById("btn_print").addEventListener("click", () => {
-    updatePrintable();
-    window.print();
+  const PROFILE = Object.freeze({
+    name: "Standard 22 ore",
+    yeastPerKg: 7.6,
+    coldHours: 14.583333333333334,
+    postColdBulkHours: 2.75,
+    proofHours: 2.25,
+    preColdBulkMinutes: 35,
+    mixingMinutes: 15,
+    autolysisMinutes: 45,
+    foldCount: 3,
+    preBakeMinutes: 30,
+    ambientTempC: 25.5,
+    totalMinutes: 1300
   });
 
-  function r(v, dec = 0) {
-    return dec === 0 ? Math.round(v) : +v.toFixed(dec);
-  }
+  const inputIds = ["data_cottura", "ora_cottura", "minuto_cottura", "n_teglie", "w_teglia"];
+  inputIds.forEach(id => document.getElementById(id).addEventListener("input", calc));
+  document.getElementById("print_note").addEventListener("input", updatePrintable);
+  document.getElementById("btn_print").addEventListener("click", () => { updatePrintable(); window.print(); });
 
-  function fmt1(v) {
-    return Number(v).toFixed(1);
-  }
-
-  function set(id, val) {
-    document.getElementById(id).textContent = val;
-  }
-
+  function set(id, value) { document.getElementById(id).textContent = value; }
   function readNumber(id, fallback) {
     const raw = document.getElementById(id).value;
     const value = Number(raw);
     return raw !== "" && Number.isFinite(value) ? value : fallback;
   }
-
-  function shiftMinutes(date, minutes) {
-    return new Date(date.getTime() + minutes * 60_000);
-  }
-
-  function formatDateInput(date) {
-    const pad = value => String(value).padStart(2, "0");
-    return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
+  function shiftMinutes(date, minutes) { return new Date(date.getTime() + minutes * 60_000); }
+  function pad(value) { return String(value).padStart(2, "0"); }
+  function formatDateInput(date) { return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`; }
+  function formatDateTime(date) {
+    return new Intl.DateTimeFormat("it-IT", {
+      weekday: "short", day: "2-digit", month: "2-digit", year: "numeric",
+      hour: "2-digit", minute: "2-digit"
+    }).format(date);
   }
 
   function parseCookingDate() {
@@ -491,215 +279,121 @@
     const day = Number(match[1]);
     const month = Number(match[2]);
     const year = Number(match[3]);
-    const hour = readNumber("ora_cottura", 18);
+    const hour = readNumber("ora_cottura", 19);
     const minute = readNumber("minuto_cottura", 0);
     if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return new Date(NaN);
-    const date = new Date(year, month - 1, day, hour, minute, 0, 0);
-    if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
-      return new Date(NaN);
-    }
-    return date;
+    const result = new Date(year, month - 1, day, hour, minute, 0, 0);
+    if (result.getFullYear() !== year || result.getMonth() !== month - 1 || result.getDate() !== day) return new Date(NaN);
+    return result;
   }
 
   function setDefaultCookingDate() {
-    const input = document.getElementById("data_cottura");
-    if (input.value) return;
-    const date = new Date();
-    date.setDate(date.getDate() + 3);
-    date.setHours(18, 0, 0, 0);
-    input.value = formatDateInput(date);
-    document.getElementById("ora_cottura").value = date.getHours();
-    document.getElementById("minuto_cottura").value = date.getMinutes();
+    const now = new Date();
+    const minimumStart = shiftMinutes(now, 30);
+    const cooking = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 19, 0, 0, 0);
+    while (shiftMinutes(cooking, -PROFILE.totalMinutes) <= minimumStart) cooking.setDate(cooking.getDate() + 1);
+    document.getElementById("data_cottura").value = formatDateInput(cooking);
+    document.getElementById("ora_cottura").value = cooking.getHours();
+    document.getElementById("minuto_cottura").value = cooking.getMinutes();
   }
 
-  function formatDateTime(date) {
-    return new Intl.DateTimeFormat("it-IT", {
-      weekday: "short", day: "2-digit", month: "2-digit", year: "numeric",
-      hour: "2-digit", minute: "2-digit"
-    }).format(date);
-  }
-
-  function formatHours(value) {
-    const totalMinutes = Math.round(value * 60);
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-    return minutes ? `${hours} h ${minutes} min` : `${hours} h`;
-  }
-
-  function buildSchedule(cookingAt, options) {
-    const readyAt = shiftMinutes(cookingAt, -options.preBakeMinutes);
-    const proofStart = shiftMinutes(readyAt, -options.proofHours * 60);
-    const fridgeExit = shiftMinutes(proofStart, -options.postColdBulkHours * 60);
-    const fridgeEntry = shiftMinutes(fridgeExit, -options.coldHours * 60);
-    const preColdBulkStart = shiftMinutes(fridgeEntry, -options.preColdBulkMinutes);
-    const mixingStart = shiftMinutes(preColdBulkStart, -options.mixingMinutes);
-    const autolysisStart = shiftMinutes(mixingStart, -options.autolysisMinutes);
+  function buildSchedule(cookingAt) {
+    const readyAt = shiftMinutes(cookingAt, -PROFILE.preBakeMinutes);
+    const proofStart = shiftMinutes(readyAt, -PROFILE.proofHours * 60);
+    const fridgeExit = shiftMinutes(proofStart, -PROFILE.postColdBulkHours * 60);
+    const fridgeEntry = shiftMinutes(fridgeExit, -PROFILE.coldHours * 60);
+    const preColdBulkStart = shiftMinutes(fridgeEntry, -PROFILE.preColdBulkMinutes);
+    const mixingStart = shiftMinutes(preColdBulkStart, -PROFILE.mixingMinutes);
+    const autolysisStart = shiftMinutes(mixingStart, -PROFILE.autolysisMinutes);
     const folds = [];
-    for (let index = 1; index <= options.foldCount; index += 1) {
-      const offset = options.preColdBulkMinutes * index / (options.foldCount + 1);
-      folds.push(shiftMinutes(preColdBulkStart, offset));
+    for (let index = 1; index <= PROFILE.foldCount; index += 1) {
+      folds.push(shiftMinutes(preColdBulkStart, PROFILE.preColdBulkMinutes * index / (PROFILE.foldCount + 1)));
     }
-    return {
-      cookingAt, readyAt, proofStart, fridgeExit, fridgeEntry, preColdBulkStart,
-      mixingStart, autolysisStart, folds
-    };
+    return { cookingAt, readyAt, proofStart, fridgeExit, fridgeEntry, preColdBulkStart, mixingStart, autolysisStart, folds };
   }
 
-  function scheduleItems(schedule, options) {
+  function scheduleItems(schedule) {
     const items = [
-      [schedule.autolysisStart, "Inizia autolisi", `Durata ${options.autolysisMinutes} min`],
-      [schedule.mixingStart, "Fine autolisi · inizia impasto", `Durata impasto ${options.mixingMinutes} min`],
-      [schedule.preColdBulkStart, "Fine impasto · inizia prima puntata", `Puntata e pieghe per ${options.preColdBulkMinutes} min`]
+      [schedule.autolysisStart, "Inizia l'autolisi", "Farina e acqua per autolisi · 45 min"],
+      [schedule.mixingStart, "Impasta", "Aggiungi acqua finale e lievito, poi sale e olio · 15 min"],
+      [schedule.preColdBulkStart, "Inizia la puntata", "Lascia in massa ed esegui le pieghe · 35 min"]
     ];
-    schedule.folds.forEach((date, index) => {
-      items.push([date, `Piega ${index + 1}`, "Serie di pieghe di rinforzo"]);
-    });
+    schedule.folds.forEach((date, index) => items.push([date, `Piega ${index + 1}`, "Serie di pieghe di rinforzo"]));
     items.push(
-      [schedule.fridgeEntry, "Metti l'impasto in frigorifero", `${formatHours(options.coldHours)} a circa 4 °C`],
-      [schedule.fridgeExit, "Togli l'impasto dal frigorifero", `Puntata/acclimatazione in massa per ${formatHours(options.postColdBulkHours)} a circa ${options.ambientTempC} °C`],
-      [schedule.proofStart, "Staglio · inizia appretto", `Appretto programmato: ${formatHours(options.proofHours)} a circa ${options.ambientTempC} °C`],
-      [schedule.readyAt, "Impasto pronto · stesura e condimento", `Preparazione e riposo finale per ${options.preBakeMinutes} min`],
-      [schedule.cookingAt, "Inizia la cottura", "Fine della preparazione finale in teglia"]
+      [schedule.fridgeEntry, "Metti in frigorifero", "In massa, a circa 4 °C · 14 h 35 min"],
+      [schedule.fridgeExit, "Togli dal frigorifero", "Lascia la massa a circa 25–26 °C · 2 h 45 min"],
+      [schedule.proofStart, "Staglia", "Dividi nei pesi scelti e lascia in appretto · 2 h 15 min"],
+      [schedule.readyAt, "Stendi e condisci", "Riposo finale in teglia · 30 min"],
+      [schedule.cookingAt, "Inforna", "Inizio cottura"]
     );
     return items.sort((a, b) => a[0] - b[0]);
   }
 
   function renderTimeline(items, targetId) {
-    const target = document.getElementById(targetId);
-    target.innerHTML = items.map(([date, title, detail]) =>
+    document.getElementById(targetId).innerHTML = items.map(([date, title, detail]) =>
       `<li><time>${formatDateTime(date)}</time><div><strong>${title}</strong><span class="detail">${detail}</span></div></li>`
     ).join("");
   }
 
+  function calcIngredients(target) {
+    const flour = Math.round(target / (1 + 0.72 + 0.025 + 0.03 + PROFILE.yeastPerKg / 1000));
+    const water = Math.round(flour * 0.72);
+    return {
+      flour,
+      water,
+      salt: Math.round(flour * 0.025),
+      oil: Math.round(flour * 0.03),
+      yeast: +(PROFILE.yeastPerKg * flour / 1000).toFixed(1),
+      autolysisWater: Math.round(water * 0.9),
+      finalWater: Math.round(water * 0.1)
+    };
+  }
+
   function updatePrintable() {
-    const nT    = +document.getElementById("n_teglie").value || 1;
-    const ore   = readNumber("ore_frigo", REF_HOURS);
-    const marg  = +document.getElementById("margine").value  || 0;
-    const ambientTempC = readNumber("temp_ambiente", DEFAULT_AMBIENT_TEMP_C);
-    const warmExposure = readNumber("puntata_post", DEFAULT_POST_COLD_BULK_HOURS)
-      + readNumber("appretto", DEFAULT_PROOF_HOURS);
-    const preBakeMinutes = readNumber("pre_cottura_min", DEFAULT_PRE_BAKE_MINUTES);
-    const note  = document.getElementById("print_note").value.trim();
     const cookingAt = parseCookingDate();
-
-    const targetTxt  = document.getElementById("target").textContent;
-    const targetMTxt = document.getElementById("target_m").textContent;
-    const farinaTxt  = document.getElementById("farina").textContent;
-    const acquaTxt   = document.getElementById("acqua").textContent;
-    const saleTxt    = document.getElementById("sale").textContent;
-    const olioTxt    = document.getElementById("olio").textContent;
-    const lievitoTxt = document.getElementById("lievito").textContent;
-    const autoInTxt  = document.getElementById("auto_in").textContent;
-    const autoFinTxt = document.getElementById("auto_fin").textContent;
-
+    const trays = Math.max(1, Math.round(readNumber("n_teglie", 1)));
     const cookingLabel = Number.isNaN(cookingAt.getTime()) ? "data da definire" : formatDateTime(cookingAt);
-    set("p_title", `Ricetta per ${nT} teglie · cottura ${cookingLabel} · ${formatHours(ore)} in frigo`);
-    set("p_target", targetTxt);
-    set("p_target_m", `${targetMTxt} (margine ${marg}%)`);
-    set("p_farina", farinaTxt);
-    set("p_acqua", `${acquaTxt} (${autoInTxt} autolisi + ${autoFinTxt} dopo)`);
-    set("p_sale", saleTxt);
-    set("p_olio", olioTxt);
-    set("p_lievito", lievitoTxt);
-    set("p_temp_ambiente", `${ambientTempC} °C`);
-    set("p_esposizione_calda", formatHours(warmExposure));
-    set("p_pre_cottura", `${preBakeMinutes} min`);
+    set("p_title", `Pizza in teglia · ${trays} teglie · cottura ${cookingLabel}`);
+    ["target", "farina", "acqua", "sale", "olio", "lievito", "auto_in", "auto_fin"].forEach(id => {
+      set(`p_${id}`, document.getElementById(id).textContent);
+    });
     document.getElementById("p_timeline").innerHTML = document.getElementById("timeline").innerHTML;
-    set("p_note", note || "");
+    set("p_note", document.getElementById("print_note").value.trim());
   }
 
   function calc() {
-    const nT = readNumber("n_teglie", 1);
-    const wT = readNumber("w_teglia", 0);
-    const ore = readNumber("ore_frigo", REF_HOURS);
-    const marg = readNumber("margine", 0);
-    const options = {
-      coldHours: ore,
-      postColdBulkHours: readNumber("puntata_post", DEFAULT_POST_COLD_BULK_HOURS),
-      proofHours: readNumber("appretto", DEFAULT_PROOF_HOURS),
-      ambientTempC: readNumber("temp_ambiente", DEFAULT_AMBIENT_TEMP_C),
-      preBakeMinutes: readNumber("pre_cottura_min", DEFAULT_PRE_BAKE_MINUTES),
-      preColdBulkMinutes: readNumber("puntata_pre", DEFAULT_PRE_COLD_BULK_MINUTES),
-      mixingMinutes: readNumber("impasto_min", DEFAULT_MIXING_MINUTES),
-      autolysisMinutes: readNumber("autolisi_min", DEFAULT_AUTOLYSIS_MINUTES),
-      foldCount: Math.max(0, Math.round(readNumber("n_pieghe", DEFAULT_FOLD_COUNT)))
-    };
+    const trays = Math.max(1, Math.round(readNumber("n_teglie", 1)));
+    const doughPerTray = Math.max(300, readNumber("w_teglia", 715));
+    const target = Math.round(trays * doughPerTray);
+    const ingredients = calcIngredients(target);
+    set("target", `${target} g`);
+    set("farina", `${ingredients.flour} g`);
+    set("acqua", `${ingredients.water} g`);
+    set("sale", `${ingredients.salt} g`);
+    set("olio", `${ingredients.oil} g`);
+    set("lievito", `${ingredients.yeast.toFixed(1)} g`);
+    set("auto_in", `${ingredients.autolysisWater} g`);
+    set("auto_fin", `${ingredients.finalWater} g`);
+
     const cookingAt = parseCookingDate();
-
-    const lievGkg = calcYeastPerKg(REF_YEAST, REF_HOURS, ore, EXPONENT);
-    // farina = impasto / (1 + 0.72 + 0.025 + 0.03 + lievGkg/1000)
-    const target  = r(nT * wT);
-    const targetM = r(target * (1 + marg / 100));
-    const farina  = r(targetM / (1 + 0.72 + 0.025 + 0.03 + lievGkg / 1000));
-    const acqua   = r(farina * 0.72);
-    const sale    = r(farina * 0.025);
-    const olio    = r(farina * 0.03);
-    const lievito = calcTotalYeastG(lievGkg, farina);
-    const autoIn  = r(acqua * 0.9);
-    const autoFin = r(acqua * 0.1);
-
-    set("liev_gkg", lievGkg  + " g/kg");
-    set("target",   target   + " g");
-    set("target_m", targetM  + " g");
-    set("farina",   farina   + " g");
-    set("acqua",    acqua    + " g");
-    set("sale",     sale     + " g");
-    set("olio",     olio     + " g");
-    set("lievito",  fmt1(lievito) + " g");
-    set("auto_in",  autoIn   + " g");
-    set("auto_fin", autoFin  + " g");
-    set("durata_autolisi", options.autolysisMinutes + " min");
-    const warmExposureHours = options.postColdBulkHours + options.proofHours;
-    set("esposizione_calda", `${formatHours(warmExposureHours)} a circa ${options.ambientTempC} °C`);
-
-    set("t_farina",  r(farina  / nT)    + " g");
-    set("t_acqua",   r(acqua   / nT)    + " g");
-    set("t_sale",    r(sale    / nT) + " g");
-    set("t_olio",    r(olio    / nT) + " g");
-    set("t_lievito", fmt1(lievito / nT) + " g");
-    set("t_impasto", r(targetM / nT)    + " g");
-
-    if (!Number.isNaN(cookingAt.getTime())) {
-      const schedule = buildSchedule(cookingAt, options);
-      renderTimeline(scheduleItems(schedule, options), "timeline");
+    const notice = document.getElementById("schedule_notice");
+    if (Number.isNaN(cookingAt.getTime())) {
+      set("start_summary", "Inserisci una data valida");
+      document.getElementById("timeline").innerHTML = "";
+      notice.textContent = "La data deve essere nel formato GG/MM/AAAA.";
+      notice.className = "notice";
     } else {
-      document.getElementById("timeline").innerHTML = "<li>Inserisci una data e un'ora di cottura valide.</li>";
+      const schedule = buildSchedule(cookingAt);
+      set("start_summary", formatDateTime(schedule.autolysisStart));
+      renderTimeline(scheduleItems(schedule), "timeline");
+      if (schedule.autolysisStart <= new Date()) {
+        notice.textContent = `Questo programma richiedeva di iniziare ${formatDateTime(schedule.autolysisStart)}. Scegli una cottura più avanti.`;
+        notice.className = "notice";
+      } else {
+        notice.textContent = `Programma di 21 h 40 min: inizia ${formatDateTime(schedule.autolysisStart)}.`;
+        notice.className = "notice ok";
+      }
     }
-
-    const av = document.getElementById("avviso");
-    if (ore < 12) {
-      av.textContent = "⚠️ Maturazione molto breve (< 12 h) — profilo non calibrato";
-      av.className = "warn";
-    } else if (ore < 24) {
-      av.textContent = "⚠️ Ciclo corto (12–24 h) — dose prudenziale da validare direttamente";
-      av.className = "warn";
-    } else if (ore > 72) {
-      av.textContent = "⚠️ Maturazione lunga (> 72 h) — rischio impasto troppo avanti";
-      av.className = "warn";
-    } else {
-      av.textContent = "✅ OK: dentro zona di maturazione consigliata (24–72 h)";
-      av.className = "ok";
-    }
-
-    const proofWarning = document.getElementById("avviso_appretto");
-    const minWarmExposure = REF_WARM_EXPOSURE_HOURS - WARM_EXPOSURE_TOLERANCE_HOURS;
-    const maxWarmExposure = REF_WARM_EXPOSURE_HOURS + WARM_EXPOSURE_TOLERANCE_HOURS;
-    const tempIsObserved = options.ambientTempC >= VALIDATED_AMBIENT_TEMP_MIN_C
-      && options.ambientTempC <= VALIDATED_AMBIENT_TEMP_MAX_C;
-    if (!tempIsObserved) {
-      proofWarning.textContent = `⚠️ Profilo termico non calibrato a ${options.ambientTempC} °C — verificare visivamente l'impasto`;
-      proofWarning.className = "warn";
-    } else if (warmExposureHours < minWarmExposure) {
-      proofWarning.textContent = `⚠️ Esposizione calda breve (${formatHours(warmExposureHours)}) — possibile impasto non ancora pronto`;
-      proofWarning.className = "warn";
-    } else if (warmExposureHours > maxWarmExposure) {
-      proofWarning.textContent = `⚠️ Esposizione calda lunga (${formatHours(warmExposureHours)}) — rischio impasto troppo avanti`;
-      proofWarning.className = "warn";
-    } else {
-      proofWarning.textContent = `✅ Esposizione calda coerente: ${formatHours(warmExposureHours)} a circa ${options.ambientTempC} °C`;
-      proofWarning.className = "ok";
-    }
-
     updatePrintable();
   }
 
