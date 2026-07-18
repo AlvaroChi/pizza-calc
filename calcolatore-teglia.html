@@ -273,7 +273,15 @@
   </div>
   <div class="row">
     <label>Appretto dopo lo staglio (h)</label>
-    <input type="number" id="appretto" value="4.5" min="0.5" step="0.25">
+    <input type="number" id="appretto" value="2.25" min="0.5" step="0.25">
+  </div>
+  <div class="row">
+    <label>Temperatura ambiente post-frigo (°C)</label>
+    <input type="number" id="temp_ambiente" value="25.5" min="5" max="40" step="0.5">
+  </div>
+  <div class="row">
+    <label>Stesura, condimento e riposo finale (min)</label>
+    <input type="number" id="pre_cottura_min" value="30" min="0" step="5">
   </div>
   <div class="row">
     <label>Prima puntata e pieghe (min)</label>
@@ -295,13 +303,14 @@
     <label>Margine extra (%)</label>
     <input type="number" id="margine" value="0" min="0" max="20" step="1">
   </div>
-  <p class="note">Profilo iniziale basato sull'esperimento del 15 luglio: appretto lungo e progressivo per lasciare margine operativo durante le cotture. Le durate restano modificabili.</p>
+  <p class="note">Profilo iniziale osservato a 25–26 °C: circa 2 h 45 min in massa e 2 h 15 min di appretto, per 5 h fino alla stesura. Seguono stesura, condimento e riposo finale. Per un appretto prevalentemente refrigerato, impostare manualmente le durate e verificare visivamente l'impasto.</p>
 </div>
 
 <!-- CALENDARIO -->
 <div class="card">
   <h2>2) Calendario operativo a ritroso</h2>
   <ol class="timeline" id="timeline"></ol>
+  <div class="fix-row"><span>Esposizione calda fino alla stesura</span><span class="fix-val" id="esposizione_calda">—</span></div>
 </div>
 
 <!-- FORMULA LIEVITO -->
@@ -309,13 +318,13 @@
   <h2>3) Formula lievito</h2>
   <div class="crv-row"><span>Lievito riferimento</span><b id="ref_gy">3.5 g/kg</b></div>
   <div class="crv-row"><span>Frigo di riferimento</span><b>41 h a 4 °C</b></div>
-  <div class="crv-row"><span>Esponente</span><b>1.1</b></div>
+  <div class="crv-row"><span>Esponente</span><b>0.75</b></div>
   <div class="crv-row"><span>Lievito calcolato (g/kg)</span><b id="liev_gkg">—</b></div>
   <div class="formula-box">
     <b>lievito (g/kg) = ref_g_kg × (ore_rif / ore_desiderate) ^ esponente</b><br>
     Le ore sono ore effettive in frigorifero; appretto e puntate sono pianificati separatamente.<br>
     Con esponente = 1.00 → proporzione inversa semplice.<br>
-    Con esponente = 1.1 → correzione nonlineare (meno lievito per tempi lunghi). Riferimento sperimentale provvisorio.
+    Con esponente = 0.75 → estrapolazione prudente sui cicli corti. Il riferimento a 41 h è osservato; le dosi sui cicli corti restano da validare direttamente.
   </div>
 </div>
 
@@ -326,7 +335,8 @@
   <div class="fix-row"><span>Sale</span><span class="fix-val">25 g/kg farina (2.5%)</span></div>
   <div class="fix-row"><span>Olio EVO</span><span class="fix-val">30 g/kg farina (3%)</span></div>
   <div class="fix-row"><span>Autolisi acqua</span><span class="fix-val">90% dell'acqua totale</span></div>
-  <div class="fix-row"><span>Appretto operativo</span><span class="fix-val">target 4–5 h</span></div>
+  <div class="fix-row"><span>Profilo termico osservato</span><span class="fix-val">5 h fino alla stesura a 25–26 °C</span></div>
+  <div class="fix-row"><span>Appretto osservato</span><span class="fix-val">circa 2 h 15 min a 25–26 °C</span></div>
   <div class="fix-row"><span>Metodo</span><span class="fix-val">Precottura base rossa + rigenerazione</span></div>
 </div>
 
@@ -366,7 +376,7 @@
 <div class="card">
   <h2>8) Avvisi operativi</h2>
   <div id="avviso" class="ok">✅ OK: dentro zona di maturazione consigliata (24–72 h)</div>
-  <div id="avviso_appretto" class="ok" style="margin-top: 8px">✅ Appretto dentro il target operativo (4–5 h)</div>
+  <div id="avviso_appretto" class="ok" style="margin-top: 8px">✅ Esposizione calda coerente con il profilo osservato</div>
 </div>
 
 <div class="card">
@@ -390,6 +400,9 @@
   <div class="print-line"><span>Sale (g)</span><b id="p_sale">—</b></div>
   <div class="print-line"><span>Olio EVO (g)</span><b id="p_olio">—</b></div>
   <div class="print-line"><span>Lievito birra fresco (g)</span><b id="p_lievito">—</b></div>
+  <div class="print-line"><span>Temperatura ambiente post-frigo</span><b id="p_temp_ambiente">—</b></div>
+  <div class="print-line"><span>Esposizione calda fino alla stesura</span><b id="p_esposizione_calda">—</b></div>
+  <div class="print-line"><span>Stesura, condimento e riposo finale</span><b id="p_pre_cottura">—</b></div>
   <h2 style="margin-top: 16px">Calendario operativo</h2>
   <ol class="timeline" id="p_timeline"></ol>
   <div class="print-note"><b>NOTE:</b> <span id="p_note"></span></div>
@@ -399,13 +412,19 @@
   // --- Parametri canonici (iniettati da Python) ---
   const REF_YEAST = 3.5;
   const REF_HOURS = 41;
-  const EXPONENT  = 1.1;
-  const DEFAULT_PROOF_HOURS = 4.5;
+  const EXPONENT  = 0.75;
+  const DEFAULT_AMBIENT_TEMP_C = 25.5;
+  const VALIDATED_AMBIENT_TEMP_MIN_C = 24.5;
+  const VALIDATED_AMBIENT_TEMP_MAX_C = 26.5;
+  const REF_WARM_EXPOSURE_HOURS = 5.0;
+  const WARM_EXPOSURE_TOLERANCE_HOURS = 0.5;
+  const DEFAULT_PROOF_HOURS = 2.25;
   const DEFAULT_POST_COLD_BULK_HOURS = 2.75;
   const DEFAULT_PRE_COLD_BULK_MINUTES = 35;
   const DEFAULT_MIXING_MINUTES = 15;
   const DEFAULT_AUTOLYSIS_MINUTES = 45;
   const DEFAULT_FOLD_COUNT = 3;
+  const DEFAULT_PRE_BAKE_MINUTES = 30;
 
   // Specchio esatto di calc_yeast_per_kg() in Python:
   //   yeast_per_kg = reference_yeast_per_kg * (reference_hours / desired_hours) ** exponent
@@ -419,7 +438,7 @@
 
   const ids = [
     "data_cottura", "ora_cottura", "minuto_cottura", "n_teglie", "w_teglia", "ore_frigo", "puntata_post",
-    "appretto", "puntata_pre", "n_pieghe", "impasto_min",
+    "appretto", "temp_ambiente", "pre_cottura_min", "puntata_pre", "n_pieghe", "impasto_min",
     "autolisi_min", "margine"
   ];
   ids.forEach(id => document.getElementById(id).addEventListener("input", calc));
@@ -499,7 +518,8 @@
   }
 
   function buildSchedule(cookingAt, options) {
-    const proofStart = shiftMinutes(cookingAt, -options.proofHours * 60);
+    const readyAt = shiftMinutes(cookingAt, -options.preBakeMinutes);
+    const proofStart = shiftMinutes(readyAt, -options.proofHours * 60);
     const fridgeExit = shiftMinutes(proofStart, -options.postColdBulkHours * 60);
     const fridgeEntry = shiftMinutes(fridgeExit, -options.coldHours * 60);
     const preColdBulkStart = shiftMinutes(fridgeEntry, -options.preColdBulkMinutes);
@@ -511,7 +531,7 @@
       folds.push(shiftMinutes(preColdBulkStart, offset));
     }
     return {
-      cookingAt, proofStart, fridgeExit, fridgeEntry, preColdBulkStart,
+      cookingAt, readyAt, proofStart, fridgeExit, fridgeEntry, preColdBulkStart,
       mixingStart, autolysisStart, folds
     };
   }
@@ -527,9 +547,10 @@
     });
     items.push(
       [schedule.fridgeEntry, "Metti l'impasto in frigorifero", `${formatHours(options.coldHours)} a circa 4 °C`],
-      [schedule.fridgeExit, "Togli l'impasto dal frigorifero", `Puntata/acclimatazione in massa per ${formatHours(options.postColdBulkHours)}`],
-      [schedule.proofStart, "Staglio · inizia appretto", `Appretto programmato: ${formatHours(options.proofHours)}`],
-      [schedule.cookingAt, "Inizia la cottura", "Impasto all'inizio della finestra operativa prevista"]
+      [schedule.fridgeExit, "Togli l'impasto dal frigorifero", `Puntata/acclimatazione in massa per ${formatHours(options.postColdBulkHours)} a circa ${options.ambientTempC} °C`],
+      [schedule.proofStart, "Staglio · inizia appretto", `Appretto programmato: ${formatHours(options.proofHours)} a circa ${options.ambientTempC} °C`],
+      [schedule.readyAt, "Impasto pronto · stesura e condimento", `Preparazione e riposo finale per ${options.preBakeMinutes} min`],
+      [schedule.cookingAt, "Inizia la cottura", "Fine della preparazione finale in teglia"]
     );
     return items.sort((a, b) => a[0] - b[0]);
   }
@@ -545,6 +566,10 @@
     const nT    = +document.getElementById("n_teglie").value || 1;
     const ore   = readNumber("ore_frigo", REF_HOURS);
     const marg  = +document.getElementById("margine").value  || 0;
+    const ambientTempC = readNumber("temp_ambiente", DEFAULT_AMBIENT_TEMP_C);
+    const warmExposure = readNumber("puntata_post", DEFAULT_POST_COLD_BULK_HOURS)
+      + readNumber("appretto", DEFAULT_PROOF_HOURS);
+    const preBakeMinutes = readNumber("pre_cottura_min", DEFAULT_PRE_BAKE_MINUTES);
     const note  = document.getElementById("print_note").value.trim();
     const cookingAt = parseCookingDate();
 
@@ -567,6 +592,9 @@
     set("p_sale", saleTxt);
     set("p_olio", olioTxt);
     set("p_lievito", lievitoTxt);
+    set("p_temp_ambiente", `${ambientTempC} °C`);
+    set("p_esposizione_calda", formatHours(warmExposure));
+    set("p_pre_cottura", `${preBakeMinutes} min`);
     document.getElementById("p_timeline").innerHTML = document.getElementById("timeline").innerHTML;
     set("p_note", note || "");
   }
@@ -580,6 +608,8 @@
       coldHours: ore,
       postColdBulkHours: readNumber("puntata_post", DEFAULT_POST_COLD_BULK_HOURS),
       proofHours: readNumber("appretto", DEFAULT_PROOF_HOURS),
+      ambientTempC: readNumber("temp_ambiente", DEFAULT_AMBIENT_TEMP_C),
+      preBakeMinutes: readNumber("pre_cottura_min", DEFAULT_PRE_BAKE_MINUTES),
       preColdBulkMinutes: readNumber("puntata_pre", DEFAULT_PRE_COLD_BULK_MINUTES),
       mixingMinutes: readNumber("impasto_min", DEFAULT_MIXING_MINUTES),
       autolysisMinutes: readNumber("autolisi_min", DEFAULT_AUTOLYSIS_MINUTES),
@@ -610,6 +640,8 @@
     set("auto_in",  autoIn   + " g");
     set("auto_fin", autoFin  + " g");
     set("durata_autolisi", options.autolysisMinutes + " min");
+    const warmExposureHours = options.postColdBulkHours + options.proofHours;
+    set("esposizione_calda", `${formatHours(warmExposureHours)} a circa ${options.ambientTempC} °C`);
 
     set("t_farina",  r(farina  / nT)    + " g");
     set("t_acqua",   r(acqua   / nT)    + " g");
@@ -626,8 +658,11 @@
     }
 
     const av = document.getElementById("avviso");
-    if (ore < 24) {
-      av.textContent = "⚠️ Maturazione breve (< 24 h) — rischio impasto poco sviluppato";
+    if (ore < 12) {
+      av.textContent = "⚠️ Maturazione molto breve (< 12 h) — profilo non calibrato";
+      av.className = "warn";
+    } else if (ore < 24) {
+      av.textContent = "⚠️ Ciclo corto (12–24 h) — dose prudenziale da validare direttamente";
       av.className = "warn";
     } else if (ore > 72) {
       av.textContent = "⚠️ Maturazione lunga (> 72 h) — rischio impasto troppo avanti";
@@ -638,14 +673,21 @@
     }
 
     const proofWarning = document.getElementById("avviso_appretto");
-    if (options.proofHours < 4) {
-      proofWarning.textContent = "⚠️ Appretto breve (< 4 h) — finestra di cottura potenzialmente ridotta";
+    const minWarmExposure = REF_WARM_EXPOSURE_HOURS - WARM_EXPOSURE_TOLERANCE_HOURS;
+    const maxWarmExposure = REF_WARM_EXPOSURE_HOURS + WARM_EXPOSURE_TOLERANCE_HOURS;
+    const tempIsObserved = options.ambientTempC >= VALIDATED_AMBIENT_TEMP_MIN_C
+      && options.ambientTempC <= VALIDATED_AMBIENT_TEMP_MAX_C;
+    if (!tempIsObserved) {
+      proofWarning.textContent = `⚠️ Profilo termico non calibrato a ${options.ambientTempC} °C — verificare visivamente l'impasto`;
       proofWarning.className = "warn";
-    } else if (options.proofHours > 5) {
-      proofWarning.textContent = "⚠️ Appretto lungo (> 5 h) — verificare temperatura e tenuta dell'impasto";
+    } else if (warmExposureHours < minWarmExposure) {
+      proofWarning.textContent = `⚠️ Esposizione calda breve (${formatHours(warmExposureHours)}) — possibile impasto non ancora pronto`;
+      proofWarning.className = "warn";
+    } else if (warmExposureHours > maxWarmExposure) {
+      proofWarning.textContent = `⚠️ Esposizione calda lunga (${formatHours(warmExposureHours)}) — rischio impasto troppo avanti`;
       proofWarning.className = "warn";
     } else {
-      proofWarning.textContent = "✅ Appretto dentro il target operativo (4–5 h)";
+      proofWarning.textContent = `✅ Esposizione calda coerente: ${formatHours(warmExposureHours)} a circa ${options.ambientTempC} °C`;
       proofWarning.className = "ok";
     }
 

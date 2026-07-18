@@ -1,4 +1,4 @@
-const CACHE_NAME = "pizza-tools-v1";
+const CACHE_NAME = "pizza-tools-v3";
 const ASSETS = [
   "./",
   "./index.html",
