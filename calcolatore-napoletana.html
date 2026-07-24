@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="pizza-calculator-build" content="20260724-175756+0200">
 <title>Calcolatore Pizza Napoletana</title>
 <style>
   :root {
@@ -15,6 +16,8 @@
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
+    max-width: 760px;
+    margin: 0 auto;
     font-family: system-ui, sans-serif;
     background: #f5f5f5;
     padding: 16px;
@@ -27,8 +30,11 @@
     padding: 14px;
     border-radius: var(--radius);
     font-size: 1.1rem;
-    margin-bottom: 16px;
+    margin-bottom: 0;
   }
+  .subtitle, .build-version { text-align: center; color: #666; }
+  .subtitle { margin: 8px 0 2px; font-size: .92rem; }
+  .build-version { margin-bottom: 16px; font-size: .7rem; }
   .card {
     background: #fff;
     border-radius: var(--radius);
@@ -136,6 +142,28 @@
     margin-top: 8px;
     line-height: 1.5;
   }
+  .advanced-actions { display: flex; justify-content: flex-end; margin-top: 12px; }
+  .advanced-panel {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 2px solid var(--blu-l);
+  }
+  .advanced-panel[hidden] { display: none; }
+  .advanced-title {
+    margin-bottom: 6px;
+    color: var(--blu);
+    font-size: .88rem;
+    font-weight: 700;
+  }
+  .start-box {
+    padding: 14px;
+    border-radius: 7px;
+    background: var(--verde);
+    color: #1B5E20;
+    text-align: center;
+  }
+  .start-box span { display: block; font-size: .83rem; }
+  .start-box strong { display: block; margin-top: 3px; font-size: 1.18rem; }
   .timeline {
     list-style: none;
   }
@@ -166,6 +194,7 @@
     font-weight: 600;
     font-size: .9rem;
   }
+  #avviso { margin-top: 10px; }
   .ok  { background: #C8E6C9; color: #1B5E20; }
   .warn{ background: #FFE0B2; color: #E65100; }
   .actions {
@@ -182,6 +211,11 @@
     cursor: pointer;
     background: var(--blu);
     color: #fff;
+  }
+  .btn.secondary {
+    border: 1px solid var(--blu);
+    background: #fff;
+    color: var(--blu);
   }
   .print-sheet {
     display: none;
@@ -200,6 +234,7 @@
     border-bottom: 1px solid #ddd;
     gap: 8px;
   }
+  .out-row[hidden], .print-line[hidden] { display: none; }
   .print-note {
     margin-top: 12px;
     border-top: 1px solid #ddd;
@@ -212,7 +247,7 @@
       color: #000;
       font-size: 12pt;
     }
-    h1, .card, .actions { display: none !important; }
+    h1, .subtitle, .build-version, .card, .actions { display: none !important; }
     .print-sheet { display: block !important; }
     @page { margin: 12mm; }
   }
@@ -223,19 +258,20 @@
   }
 </style>
 </head>
-<body>
+<body data-build-version="20260724-175756+0200">
 
-<h1>🍕 Calcolatore Pizza Napoletana 65%</h1>
+<h1>🍕 Pizza Napoletana 65%</h1>
+<p class="subtitle">Imposta la produzione e l'ora di cottura. Il profilo è già pronto.</p>
+<p class="build-version">Versione 20260724-175756+0200</p>
 
-<!-- INPUT -->
 <div class="card">
-  <h2>1) Input e pianificazione</h2>
+  <h2>1) La tua produzione</h2>
   <div class="row">
-    <label>Data di inizio cottura (GG/MM/AAAA)</label>
+    <label for="data_cottura">Giorno della cottura</label>
     <input type="text" id="data_cottura" inputmode="numeric" placeholder="GG/MM/AAAA" maxlength="10">
   </div>
   <div class="row">
-    <label>Ora di inizio cottura</label>
+    <label>Ora della cottura</label>
     <div class="time-input">
       <input type="number" id="ora_cottura" value="18" min="0" max="23" step="1" aria-label="Ora cottura">
       <span>:</span>
@@ -243,130 +279,118 @@
     </div>
   </div>
   <div class="row">
-    <label>Panetti baby</label>
+    <label for="n_baby">Numero di panetti baby</label>
     <input type="number" id="n_baby" value="24" min="0" step="1">
   </div>
   <div class="row">
-    <label>Peso panetto baby (g)</label>
+    <label for="w_baby">Grammi per panetto baby</label>
     <input type="number" id="w_baby" value="190" min="100" step="1">
   </div>
   <div class="row">
-    <label>Panetti standard</label>
+    <label for="n_std">Numero di panetti standard</label>
     <input type="number" id="n_std" value="6" min="0" step="1">
   </div>
   <div class="row">
-    <label>Peso panetto standard (g)</label>
+    <label for="w_std">Grammi per panetto standard</label>
     <input type="number" id="w_std" value="270" min="100" step="1">
   </div>
-  <div class="row">
-    <label>Ore effettive in frigo a 4 °C</label>
-    <input type="number" id="ore_frigo" value="24" min="1" step="0.25">
+  <p class="note">Usiamo automaticamente il profilo 24 h. Apri le opzioni avanzate solo se vuoi modificare tempi, lavorazione o servizio.</p>
+  <div class="advanced-actions">
+    <button type="button" class="btn secondary" id="btn_advanced" aria-expanded="false" aria-controls="advanced_panel">Opzioni avanzate</button>
   </div>
-  <div class="row">
-    <label>Puntata in massa dopo il frigo (h)</label>
-    <input type="number" id="puntata_post" value="1.0" min="0" step="0.25">
+  <div class="advanced-panel" id="advanced_panel" hidden>
+    <p class="advanced-title">Tempi, lavorazione e servizio</p>
+    <div class="row">
+      <label for="ore_frigo">Ore effettive in frigo a 4 °C</label>
+      <input type="number" id="ore_frigo" value="24" min="1" step="0.25">
+    </div>
+    <div class="row">
+      <label for="puntata_post">Puntata in massa dopo il frigo (h)</label>
+      <input type="number" id="puntata_post" value="1.0" min="0" step="0.25">
+    </div>
+    <div class="row">
+      <label for="appretto">Appretto primo panetto (h)</label>
+      <input type="number" id="appretto" value="4.5" min="0.5" step="0.25">
+    </div>
+    <div class="row">
+      <label for="min_panetto">Tempo medio staglio per panetto (min)</label>
+      <input type="number" id="min_panetto" value="1" min="0.1" step="0.1">
+    </div>
+    <div class="row">
+      <label for="durata_servizio">Durata servizio prevista (h)</label>
+      <input type="number" id="durata_servizio" value="2" min="0" step="0.25">
+    </div>
+    <div class="row">
+      <label for="ritardo_gruppo_b">Ritardo secondo gruppo (min)</label>
+      <input type="number" id="ritardo_gruppo_b" value="45" min="0" step="5">
+    </div>
+    <div class="row">
+      <label for="preriscaldo_min">Preriscaldamento forno (min)</label>
+      <input type="number" id="preriscaldo_min" value="25" min="0" step="5">
+    </div>
+    <div class="row">
+      <label for="puntata_pre">Prima puntata e pieghe (min)</label>
+      <input type="number" id="puntata_pre" value="25" min="0" step="5">
+    </div>
+    <div class="row">
+      <label for="n_pieghe">Numero serie di pieghe</label>
+      <input type="number" id="n_pieghe" value="2" min="0" max="6" step="1">
+    </div>
+    <div class="row">
+      <label for="impasto_min">Durata impasto (min)</label>
+      <input type="number" id="impasto_min" value="15" min="1" step="1">
+    </div>
+    <div class="row">
+      <label for="autolisi_min">Durata autolisi (min)</label>
+      <input type="number" id="autolisi_min" value="45" min="0" step="5">
+    </div>
+    <div class="row">
+      <label for="margine">Margine extra (%)</label>
+      <input type="number" id="margine" value="0" min="0" max="20" step="1">
+    </div>
+    <div class="formula-box" style="margin-top:10px">
+      <b>Formula lievito:</b> 1.6 g/kg a 24 h, adattata tra 18 e 72 h.
+    </div>
+    <div class="out-row" style="margin-top:8px"><span>Lievito calcolato (g/kg)</span><span id="lievito_gkg">—</span></div>
   </div>
-  <div class="row">
-    <label>Appretto primo panetto (h)</label>
-    <input type="number" id="appretto" value="4.5" min="0.5" step="0.25">
-  </div>
-  <div class="row">
-    <label>Tempo medio staglio per panetto (min)</label>
-    <input type="number" id="min_panetto" value="1" min="0.1" step="0.1">
-  </div>
-  <div class="row">
-    <label>Durata servizio prevista (h)</label>
-    <input type="number" id="durata_servizio" value="2" min="0" step="0.25">
-  </div>
-  <div class="row">
-    <label>Ritardo secondo gruppo (min)</label>
-    <input type="number" id="ritardo_gruppo_b" value="45" min="0" step="5">
-  </div>
-  <div class="row">
-    <label>Preriscaldamento forno (min)</label>
-    <input type="number" id="preriscaldo_min" value="25" min="0" step="5">
-  </div>
-  <div class="row">
-    <label>Prima puntata e pieghe (min)</label>
-    <input type="number" id="puntata_pre" value="25" min="0" step="5">
-  </div>
-  <div class="row">
-    <label>Numero serie di pieghe</label>
-    <input type="number" id="n_pieghe" value="2" min="0" max="6" step="1">
-  </div>
-  <div class="row">
-    <label>Durata impasto (min)</label>
-    <input type="number" id="impasto_min" value="15" min="1" step="1">
-  </div>
-  <div class="row">
-    <label>Durata autolisi (min)</label>
-    <input type="number" id="autolisi_min" value="45" min="0" step="5">
-  </div>
-  <div class="row">
-    <label>Margine extra (%)</label>
-    <input type="number" id="margine" value="0" min="0" max="20" step="1">
-  </div>
-  <p class="note">Profilo predefinito: 24 h reali di frigo, 1 h di acclimatazione in massa e appretto progressivo di 4–4,5 h a 21–22 °C. Per servizi lunghi il calcolatore segnala la necessità di gruppi sfalsati.</p>
 </div>
 
-<!-- CALENDARIO -->
 <div class="card">
-  <h2>2) Calendario operativo a ritroso</h2>
-  <ol class="timeline" id="timeline"></ol>
+  <h2>2) Ingredienti totali</h2>
+  <div class="out-row"><span>Impasto</span><span id="target">—</span></div>
+  <div class="out-row" id="target_m_row" hidden><span>Impasto con margine</span><span id="target_m">—</span></div>
+  <div class="out-row"><span>Farina</span><span id="farina">—</span></div>
+  <div class="out-row"><span>Acqua</span><span id="acqua">—</span></div>
+  <div class="out-row"><span>Sale</span><span id="sale">—</span></div>
+  <div class="out-row"><span>Lievito di birra fresco</span><span id="lievito">—</span></div>
 </div>
 
-<!-- PARAMETRI FISSI -->
 <div class="card">
-  <h2>3) Parametri fissi</h2>
+  <h2>3) Preparazione dell'impasto</h2>
+  <div class="fix-row"><span>Acqua per l'autolisi</span><span class="fix-val" id="auto_in">—</span></div>
+  <div class="fix-row"><span>Acqua da aggiungere dopo</span><span class="fix-val" id="auto_fin">—</span></div>
+  <div class="fix-row"><span>Durata pianificata</span><span class="fix-val" id="durata_autolisi">—</span></div>
   <div class="fix-row"><span>Idratazione</span><span class="fix-val">65%</span></div>
   <div class="fix-row"><span>Sale</span><span class="fix-val">25 g/kg farina</span></div>
-  <div class="fix-row"><span>Autolisi acqua</span><span class="fix-val">90%</span></div>
-  <div class="fix-row"><span>Temperatura frigo</span><span class="fix-val">4 °C</span></div>
   <div class="fix-row"><span>Temperatura appretto</span><span class="fix-val">21–22 °C</span></div>
+  <p class="note">Usa il 90% dell'acqua in autolisi e aggiungi il restante 10% durante l'impasto.</p>
 </div>
 
-<!-- FORMULA LIEVITO -->
 <div class="card">
-  <h2>4) Formula lievito</h2>
-  <div class="formula-box">
-    <b>lievito (g/kg) = 1.6 × (ore_eff / 24)^(-0.525)</b><br>
-    ore_eff = MAX(18, MIN(72, ore_frigo))<br><br>
-    Lievito base di riferimento: <b>1.6 g/kg @ 24 h reali in frigo</b><br>
-    Profilo associato: 1 h in massa + 4–4,5 h di appretto a 21–22 °C.<br>
-    Zona empirica documentata: <b>18 – 72 h</b>
+  <h2>4) Il tuo programma</h2>
+  <div class="start-box">
+    <span>Comincia da qui</span>
+    <strong id="start_summary">—</strong>
   </div>
-  <div class="out-row"><span>Lievito calcolato (g/kg)</span><span id="lievito_gkg">—</span></div>
-</div>
-
-<!-- RICETTA TOTALE -->
-<div class="card">
-  <h2>5) Ricetta totale</h2>
-  <div class="out-row"><span>Impasto target (g)</span><span id="target">—</span></div>
-  <div class="out-row"><span>Impasto con margine (g)</span><span id="target_m">—</span></div>
-  <div class="out-row"><span>Farina totale (g)</span><span id="farina">—</span></div>
-  <div class="out-row"><span>Acqua totale (g)</span><span id="acqua">—</span></div>
-  <div class="out-row"><span>Sale totale (g)</span><span id="sale">—</span></div>
-  <div class="out-row"><span>Lievito fresco (g)</span><span id="lievito">—</span></div>
-</div>
-
-<!-- AUTOLISI -->
-<div class="card">
-  <h2>6) Autolisi</h2>
-  <div class="out-row"><span>Acqua in autolisi (g)</span><span id="auto_in">—</span></div>
-  <div class="out-row"><span>Acqua finale (g)</span><span id="auto_fin">—</span></div>
-  <div class="fix-row"><span>Durata pianificata</span><span class="fix-val" id="durata_autolisi">—</span></div>
-</div>
-
-<!-- AVVISO -->
-<div class="card">
-  <h2>7) Avvisi operativi</h2>
+  <ol class="timeline" id="timeline"></ol>
+  <div id="schedule_notice" class="note">Il programma è pronto.</div>
   <div id="avviso" class="ok">OK: dentro zona empirica validata</div>
   <div id="avviso_appretto" class="ok" style="margin-top: 8px">Appretto dentro il target operativo</div>
   <div id="avviso_servizio" class="ok" style="margin-top: 8px">Servizio breve: un solo gruppo gestibile</div>
 </div>
 
 <div class="card">
-  <h2>8) Stampa</h2>
+  <h2>Stampa</h2>
   <div class="row">
     <label>Note stampa</label>
     <input type="text" id="print_note" placeholder="Scrivi una nota breve (opzionale)">
@@ -380,7 +404,7 @@
 <div class="print-sheet" id="print_sheet">
   <h2 id="p_title">Ricetta</h2>
   <div class="print-line"><span>Impasto target (g)</span><b id="p_target">—</b></div>
-  <div class="print-line"><span>Impasto con margine</span><b id="p_target_m">—</b></div>
+  <div class="print-line" id="p_target_m_row" hidden><span>Impasto con margine</span><b id="p_target_m">—</b></div>
   <div class="print-line"><span>Farina (g)</span><b id="p_farina">—</b></div>
   <div class="print-line"><span>Acqua totale</span><b id="p_acqua">—</b></div>
   <div class="print-line"><span>Sale (g)</span><b id="p_sale">—</b></div>
@@ -388,6 +412,7 @@
   <h2 style="margin-top: 16px">Calendario operativo</h2>
   <ol class="timeline" id="p_timeline"></ol>
   <div class="print-note"><b>NOTE:</b> <span id="p_note"></span></div>
+  <p style="margin-top:12px;font-size:.8rem">Versione 20260724-175756+0200</p>
 </div>
 
 <script>
@@ -418,6 +443,13 @@
   document.getElementById("btn_print").addEventListener("click", () => {
     updatePrintable();
     window.print();
+  });
+  document.getElementById("btn_advanced").addEventListener("click", event => {
+    const panel = document.getElementById("advanced_panel");
+    const willOpen = panel.hidden;
+    panel.hidden = !willOpen;
+    event.currentTarget.setAttribute("aria-expanded", String(willOpen));
+    event.currentTarget.textContent = willOpen ? "Nascondi opzioni avanzate" : "Opzioni avanzate";
   });
 
   function r(v, dec = 0) {
@@ -596,6 +628,7 @@
     set("p_sale", saleTxt);
     set("p_lievito", lievitoTxt);
     document.getElementById("p_timeline").innerHTML = document.getElementById("timeline").innerHTML;
+    document.getElementById("p_target_m_row").hidden = document.getElementById("target_m_row").hidden;
     set("p_note", note || "");
   }
 
@@ -635,6 +668,7 @@
 
     set("target",     target    + " g");
     set("target_m",   targetM   + " g");
+    document.getElementById("target_m_row").hidden = marg === 0;
     set("farina",     farina    + " g");
     set("acqua",      acqua     + " g");
     set("sale",       sale      + " g");
@@ -645,11 +679,23 @@
     set("durata_autolisi", options.autolysisMinutes + " min");
 
     let schedule = null;
+    const scheduleNotice = document.getElementById("schedule_notice");
     if (!Number.isNaN(cookingAt.getTime())) {
       schedule = buildSchedule(cookingAt, options);
       renderTimeline(scheduleItems(schedule, options), "timeline");
+      set("start_summary", formatDateTime(schedule.autolysisStart));
+      if (schedule.autolysisStart <= new Date()) {
+        scheduleNotice.textContent = `Questo programma richiedeva di iniziare ${formatDateTime(schedule.autolysisStart)}. Scegli una cottura più avanti.`;
+        scheduleNotice.className = "note warn";
+      } else {
+        scheduleNotice.textContent = `Programma pronto: inizia ${formatDateTime(schedule.autolysisStart)}.`;
+        scheduleNotice.className = "note ok";
+      }
     } else {
       document.getElementById("timeline").innerHTML = "<li>Inserisci una data e un'ora di cottura valide.</li>";
+      set("start_summary", "Inserisci una data valida");
+      scheduleNotice.textContent = "La data deve essere nel formato GG/MM/AAAA.";
+      scheduleNotice.className = "note warn";
     }
 
     const av = document.getElementById("avviso");
